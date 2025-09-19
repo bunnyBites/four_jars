@@ -1,6 +1,7 @@
 // lib/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 
@@ -12,57 +13,29 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Map<String, dynamic>> _categories = [
-    {
-      'name': 'Needs',
-      'type': MainCategoryType.needs,
-      'allocated': 50000.0,
-      'spent': 32500.0,
-      'color': Colors.green,
-    },
-    {
-      'name': 'Wants',
-      'type': MainCategoryType.wants,
-      'allocated': 30000.0,
-      'spent': 15750.0,
-      'color': Colors.blue,
-    },
-    {
-      'name': 'Savings',
-      'type': MainCategoryType.savings,
-      'allocated': 10000.0,
-      'spent': 10000.0,
-      'color': Colors.purple,
-    },
-    {
-      'name': 'Investments',
-      'type': MainCategoryType.investments,
-      'allocated': 10000.0,
-      'spent': 10000.0,
-      'color': Colors.orange,
-    },
-  ];
+  // The UI now holds an instance of our logic manager.
+  final _budgetManager = BudgetManager();
 
-  // 3. CREATE the function to handle adding a transaction
+  // A map to convert color names from our constants to actual Color objects.
+  final Map<String, Color> _colorMap = {
+    'green': Colors.green,
+    'blue': Colors.blue,
+    'purple': Colors.purple,
+    'orange': Colors.orange,
+  };
+
   void _addTransaction(
     double amount,
     String description,
     MainCategoryType categoryType,
   ) {
-    // setState() tells Flutter that data has changed and the UI needs to rebuild
-    setState(() {
-      final categoryIndex = _categories.indexWhere(
-        (cat) => cat['type'] == categoryType,
-      );
-      if (categoryIndex != -1) {
-        _categories[categoryIndex]['spent'] += amount;
-      }
-    });
-    // In a real app, you would also save the full transaction object to a database here
-    print('Added transaction: $description - ₹$amount to ${categoryType.name}');
+    // Tell the manager to perform the logic.
+    _budgetManager.addTransaction(amount: amount, categoryType: categoryType);
+
+    // Then, simply tell the UI to rebuild itself.
+    setState(() {});
   }
 
-  // 4. CREATE the function to show the modal
   void _openAddTransactionSheet() {
     showModalBottomSheet(
       context: context,
@@ -84,19 +57,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: _categories.length,
+        itemCount: _budgetManager.categories.length,
         itemBuilder: (context, index) {
-          final category = _categories[index];
+          final category = _budgetManager.categories[index];
           return CategoryCard(
             name: category['name'],
             allocated: category['allocated'],
             spent: category['spent'],
-            color: category['color'],
+            color: _colorMap[category['colorName']] ?? Colors.grey,
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        // 6. CALL our new function to open the modal
         onPressed: _openAddTransactionSheet,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
@@ -107,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- 3. THE REUSABLE CARD WIDGET ---
 class CategoryCard extends StatelessWidget {
   final String name;
   final double allocated;
