@@ -1,41 +1,78 @@
 // lib/screens/home/home_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 
-// --- 1. DUMMY DATA ---
-// We'll create some temporary data to simulate a user's budget.
-// Later, this will come from our database.
-final List<Map<String, dynamic>> dummyCategories = [
-  {
-    'name': 'Needs',
-    'allocated': 50000.0,
-    'spent': 32500.0,
-    'color': Colors.green,
-  },
-  {
-    'name': 'Wants',
-    'allocated': 30000.0,
-    'spent': 15750.0,
-    'color': Colors.blue,
-  },
-  {
-    'name': 'Savings',
-    'allocated': 10000.0,
-    'spent': 10000.0,
-    'color': Colors.purple,
-  },
-  {
-    'name': 'Investments',
-    'allocated': 10000.0,
-    'spent': 10000.0,
-    'color': Colors.orange,
-  },
-];
-
-// --- 2. THE MAIN HOME SCREEN WIDGET ---
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> _categories = [
+    {
+      'name': 'Needs',
+      'type': MainCategoryType.needs,
+      'allocated': 50000.0,
+      'spent': 32500.0,
+      'color': Colors.green,
+    },
+    {
+      'name': 'Wants',
+      'type': MainCategoryType.wants,
+      'allocated': 30000.0,
+      'spent': 15750.0,
+      'color': Colors.blue,
+    },
+    {
+      'name': 'Savings',
+      'type': MainCategoryType.savings,
+      'allocated': 10000.0,
+      'spent': 10000.0,
+      'color': Colors.purple,
+    },
+    {
+      'name': 'Investments',
+      'type': MainCategoryType.investments,
+      'allocated': 10000.0,
+      'spent': 10000.0,
+      'color': Colors.orange,
+    },
+  ];
+
+  // 3. CREATE the function to handle adding a transaction
+  void _addTransaction(
+    double amount,
+    String description,
+    MainCategoryType categoryType,
+  ) {
+    // setState() tells Flutter that data has changed and the UI needs to rebuild
+    setState(() {
+      final categoryIndex = _categories.indexWhere(
+        (cat) => cat['type'] == categoryType,
+      );
+      if (categoryIndex != -1) {
+        _categories[categoryIndex]['spent'] += amount;
+      }
+    });
+    // In a real app, you would also save the full transaction object to a database here
+    print('Added transaction: $description - ₹$amount to ${categoryType.name}');
+  }
+
+  // 4. CREATE the function to show the modal
+  void _openAddTransactionSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        // 5. PASS the _addTransaction function to the sheet
+        return AddTransactionSheet(onSave: _addTransaction);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +82,11 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
       ),
-      // Use a ListView.builder to create a scrollable list of our category cards
       body: ListView.builder(
-        padding: const EdgeInsets.all(16.0), // Add some spacing around the list
-        itemCount: dummyCategories.length, // The number of items in the list
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _categories.length,
         itemBuilder: (context, index) {
-          final category = dummyCategories[index];
-          // For each item in our dummy data, create a CategoryCard
+          final category = _categories[index];
           return CategoryCard(
             name: category['name'],
             allocated: category['allocated'],
@@ -61,21 +96,11 @@ class HomeScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            // isScrollControlled allows the sheet to take up more screen space
-            // and avoids the keyboard covering the text fields.
-            isScrollControlled: true,
-            builder: (ctx) {
-              // Return the widget we just created!
-              return const AddTransactionSheet();
-            },
-          );
-        },
-        backgroundColor: Colors.teal, // Use a color from our theme
+        // 6. CALL our new function to open the modal
+        onPressed: _openAddTransactionSheet,
+        backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        tooltip: 'Add Transaction', // Shows on long-press
+        tooltip: 'Add Transaction',
         child: const Icon(Icons.add),
       ),
     );

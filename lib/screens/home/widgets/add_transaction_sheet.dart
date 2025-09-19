@@ -4,8 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/models/main_category_type.dart';
 
 class AddTransactionSheet extends StatefulWidget {
-  const AddTransactionSheet({super.key});
+  // 1. Add a final property to hold the function
+  final void Function(
+    double amount,
+    String description,
+    MainCategoryType category,
+  )
+  onSave;
 
+  // 2. Add it to the constructor
+  const AddTransactionSheet({super.key, required this.onSave});
   @override
   State<AddTransactionSheet> createState() => _AddTransactionSheetState();
 }
@@ -14,6 +22,25 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   MainCategoryType? _selectedCategory = MainCategoryType.wants;
+
+  void _submitData() {
+    final enteredAmount = double.tryParse(_amountController.text);
+    final enteredDescription = _descriptionController.text;
+
+    // Basic validation
+    if (enteredAmount == null ||
+        enteredAmount <= 0 ||
+        enteredDescription.trim().isEmpty ||
+        _selectedCategory == null) {
+      // You could show an error message here
+      return;
+    }
+
+    // 3. Call the function passed from the parent widget
+    widget.onSave(enteredAmount, enteredDescription, _selectedCategory!);
+
+    Navigator.pop(context); // Close the bottom sheet
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,12 +106,7 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                print('Amount: ${_amountController.text}');
-                print('Description: ${_descriptionController.text}');
-                print('Category: ${_selectedCategory?.name}');
-                Navigator.pop(context);
-              },
+              onPressed: _submitData,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Colors.teal,
