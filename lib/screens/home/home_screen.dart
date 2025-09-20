@@ -3,6 +3,7 @@ import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/widgets/spending_chart.dart';
 import 'package:four_jars/screens/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -68,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Four Jars'),
+        title: const Text('Four Jars'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
         actions: [
@@ -79,34 +80,61 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _budgetManager.categories.length,
-        itemBuilder: (context, index) {
-          final category = _budgetManager.categories[index];
-          return GestureDetector(
-            onTap: () {
-              final categoryTransactions = _budgetManager.transactions
-                  .where((t) => t.mainCategoryId == category['type'])
-                  .toList();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CategoryDetailsScreen(
-                    categoryName: category['name'],
-                    transactions: categoryTransactions,
-                  ),
-                ),
-              );
-            },
-            child: CategoryCard(
-              name: category['name'],
-              allocated: category['allocated'],
-              spent: category['spent'],
-              color: _colorMap[category['colorName']] ?? Colors.grey,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SpendingChart(
+              categories: _budgetManager.categories,
+              colorMap: _colorMap,
             ),
-          );
-        },
+          ),
+          const Divider(height: 1),
+          Expanded(
+            // --- CHANGE 1: Replace ListView.builder with GridView.builder ---
+            child: GridView.builder(
+              padding: const EdgeInsets.all(16.0),
+              // This delegate defines the grid's layout
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // 2 columns
+                crossAxisSpacing: 16, // Horizontal space between items
+                mainAxisSpacing: 16, // Vertical space between items
+                childAspectRatio: 1, // Makes the items square (width == height)
+              ),
+              itemCount: _budgetManager.categories.length,
+              itemBuilder: (context, index) {
+                final category = _budgetManager.categories[index];
+                return GestureDetector(
+                  onTap: () {
+                    final categoryTransactions = _budgetManager.transactions
+                        .where((t) => t.mainCategoryId == category['type'])
+                        .toList();
+
+                    print(
+                      'Found ${categoryTransactions.length} transactions for this category.',
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CategoryDetailsScreen(
+                          categoryName: category['name'],
+                          transactions: categoryTransactions,
+                        ),
+                      ),
+                    );
+                  },
+                  child: CategoryCard(
+                    name: category['name'],
+                    allocated: category['allocated'],
+                    spent: category['spent'],
+                    color: _colorMap[category['colorName']] ?? Colors.grey,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _openAddTransactionSheet,
@@ -119,6 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// In lib/screens/home/home_screen.dart
+
+// --- Updated CategoryCard with Piggy Bank Icon ---
 class CategoryCard extends StatelessWidget {
   final String name;
   final double allocated;
@@ -136,48 +167,45 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double progress = (allocated > 0) ? spent / allocated : 0.0;
-    final double remaining = allocated - spent;
 
     return Card(
       elevation: 4.0,
-      margin: const EdgeInsets.only(bottom: 16.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              name,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+            Row(
+              children: [
+                Icon(Icons.savings, color: color, size: 32),
+                const SizedBox(width: 8),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12.0),
+            const Spacer(),
             Text(
-              '₹${spent.toStringAsFixed(0)} / ₹${allocated.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              '₹${spent.toStringAsFixed(0)}',
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'of ₹${allocated.toStringAsFixed(0)}',
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
             ),
             const SizedBox(height: 8.0),
             LinearProgressIndicator(
               value: progress,
-              minHeight: 12.0,
-              backgroundColor: color.withValues(alpha: 0.2),
+              minHeight: 8.0,
+              backgroundColor: color.withValues(alpha: 0.3),
               valueColor: AlwaysStoppedAnimation<Color>(color),
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            const SizedBox(height: 8.0),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                'Remaining: ₹${remaining.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.black87,
-                ),
-              ),
+              borderRadius: BorderRadius.circular(4.0),
             ),
           ],
         ),
