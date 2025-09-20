@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/home_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
-  // Make main asynchronous
-  // Ensure Flutter is ready before we do anything else
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Hive for Flutter
   await Hive.initFlutter();
 
-  // Register the MainCategoryType adapter
+  // Register our new adapters
   Hive.registerAdapter(MainCategoryTypeAdapter());
+  Hive.registerAdapter(TransactionAdapter());
 
-  // Open a 'box' where we will store our data
+  // We'll open a second box just for transactions
   await Hive.openBox('budgetBox');
+  await Hive.openBox<Transaction>('transactionsBox'); // A typed box
 
   // Create the single BudgetManager instance
   final budgetManager = BudgetManager();

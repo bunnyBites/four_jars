@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -28,9 +29,10 @@ class _HomeScreenState extends State<HomeScreen> {
     MainCategoryType categoryType,
   ) async {
     // Tell the manager to perform the logic.
-    await widget.budgetManager.addTransaction(
+    widget.budgetManager.addTransaction(
       amount: amount,
       categoryType: categoryType,
+      description: description,
     );
 
     // Then, simply tell the UI to rebuild itself.
@@ -66,11 +68,31 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: widget.budgetManager.categories.length,
         itemBuilder: (context, index) {
           final category = widget.budgetManager.categories[index];
-          return CategoryCard(
-            name: category['name'],
-            allocated: category['allocated'],
-            spent: category['spent'],
-            color: _colorMap[category['colorName']] ?? Colors.grey,
+          return GestureDetector(
+            // 1. Wrap the card with GestureDetector
+            onTap: () {
+              // 2. Filter the transactions for this category
+              final categoryTransactions = widget.budgetManager.transactions
+                  .where((t) => t.mainCategoryId == category['type'])
+                  .toList();
+
+              // 3. Navigate to the new screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CategoryDetailsScreen(
+                    categoryName: category['name'],
+                    transactions: categoryTransactions,
+                  ),
+                ),
+              );
+            },
+            child: CategoryCard(
+              name: category['name'],
+              allocated: category['allocated'],
+              spent: category['spent'],
+              color: _colorMap[category['colorName']] ?? Colors.grey,
+            ),
           );
         },
       ),
