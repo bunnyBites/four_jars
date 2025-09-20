@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/models/sub_category.dart';
+import 'package:four_jars/models/transaction.dart';
+import 'package:uuid/uuid.dart';
 
 class AddTransactionSheet extends StatefulWidget {
-  final void Function(
-    double amount,
-    String description,
-    MainCategoryType category,
-    String subCategoryId,
-  )
-  onSave;
+  // We now accept an optional transaction for editing
+  final Transaction? existingTransaction;
 
-  const AddTransactionSheet({super.key, required this.onSave});
+  // The onSave callback is now more generic
+  final void Function(Transaction transaction) onSave;
+
+  const AddTransactionSheet({
+    super.key,
+    required this.onSave,
+    this.existingTransaction, // Add to constructor
+  });
 
   @override
   State<AddTransactionSheet> createState() => _AddTransactionSheetState();
@@ -28,10 +32,26 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   final BudgetManager _budgetManager = BudgetManager();
 
+  // A new variable to check if we are in edit mode
+  bool get _isEditing => widget.existingTransaction != null;
+
   @override
   void initState() {
     super.initState();
     _budgetManager.loadData();
+
+    // If we are editing, pre-fill all the form fields
+    if (_isEditing) {
+      final transaction = widget.existingTransaction!;
+      _amountController.text = transaction.amount.toString();
+      _descriptionController.text = transaction.description;
+      _selectedMainCategory = transaction.mainCategoryId;
+      // Trigger the sub-category list to populate
+      _availableSubCategories = _budgetManager.getSubCategoriesFor(
+        _selectedMainCategory!,
+      );
+      _selectedSubCategoryId = transaction.subCategoryId;
+    }
   }
 
   void _onMainCategoryChanged(MainCategoryType? newValue) {
@@ -56,12 +76,16 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
       return;
     }
 
-    widget.onSave(
-      enteredAmount,
-      enteredDescription,
-      _selectedMainCategory!,
-      _selectedSubCategoryId!,
+    final transaction = Transaction(
+      id: _isEditing ? widget.existingTransaction!.id : const Uuid().v4(),
+      amount: enteredAmount,
+      description: enteredDescription,
+      date: _isEditing ? widget.existingTransaction!.date : DateTime.now(),
+      mainCategoryId: _selectedMainCategory!,
+      subCategoryId: _selectedSubCategoryId!,
     );
+
+    widget.onSave(transaction);
     Navigator.pop(context);
   }
 
@@ -82,8 +106,8 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Add New Transaction',
+                Text(
+                  _isEditing ? 'Edit Transaction' : 'Add New Transaction',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),

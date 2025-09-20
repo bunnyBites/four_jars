@@ -139,4 +139,19 @@ class BudgetManager {
     await _subCategoriesBox.delete(id);
     loadData();
   }
+
+  Future<void> updateTransaction({
+    required Transaction updatedTransaction,
+  }) async {
+    // Hive automatically overwrites the entry with the same key (the ID)
+    await _transactionsBox.put(updatedTransaction.id, updatedTransaction);
+    // After any change, always reload the budget to recalculate totals
+    loadData();
+  }
+
+  Future<void> deleteTransaction({required String transactionId}) async {
+    await _transactionsBox.delete(transactionId);
+    // After deleting, reload the budget to update the 'spent' totals
+    loadData();
+  }
 }

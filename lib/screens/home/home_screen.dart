@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
@@ -29,18 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _budgetManager.loadData();
   }
 
-  void _addTransaction(
-    double amount,
-    String description,
-    MainCategoryType categoryType,
-    String subCategoryId,
-  ) {
+  void _addTransaction(Transaction transaction) {
     setState(() {
       _budgetManager.addTransaction(
-        amount: amount,
-        description: description,
-        categoryType: categoryType,
-        subCategoryId: subCategoryId,
+        amount: transaction.amount,
+        description: transaction.description,
+        categoryType: transaction.mainCategoryId,
+        subCategoryId: transaction.subCategoryId,
       );
     });
   }
