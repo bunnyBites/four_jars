@@ -1,47 +1,38 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'transaction.dart';
+part of 'sub_category.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class TransactionAdapter extends TypeAdapter<Transaction> {
+class SubCategoryAdapter extends TypeAdapter<SubCategory> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
-  Transaction read(BinaryReader reader) {
+  SubCategory read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Transaction(
+    return SubCategory(
       id: fields[0] as String,
-      amount: fields[1] as double,
-      description: fields[2] as String,
-      date: fields[3] as DateTime,
-      mainCategoryId: fields[4] as MainCategoryType,
-      subCategoryId: fields[5] as String,
+      name: fields[1] as String,
+      mainCategoryId: fields[2] as MainCategoryType,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Transaction obj) {
+  void write(BinaryWriter writer, SubCategory obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.amount)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.description)
-      ..writeByte(3)
-      ..write(obj.date)
-      ..writeByte(4)
-      ..write(obj.mainCategoryId)
-      ..writeByte(5)
-      ..write(obj.subCategoryId);
+      ..write(obj.mainCategoryId);
   }
 
   @override
@@ -50,7 +41,7 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TransactionAdapter &&
+      other is SubCategoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

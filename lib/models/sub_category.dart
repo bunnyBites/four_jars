@@ -1,15 +1,22 @@
+import 'package:hive/hive.dart';
 import 'package:four_jars/models/main_category_type.dart';
 
+part 'sub_category.g.dart';
+
+@HiveType(typeId: 3)
 class SubCategory {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
-  final double allocatedAmount;
+
+  @HiveField(2)
   final MainCategoryType mainCategoryId;
 
   SubCategory({
     required this.id,
     required this.name,
-    required this.allocatedAmount,
     required this.mainCategoryId,
   });
 }

@@ -1,41 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/models/sub_category.dart';
 import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/home_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
+  // Ensure Flutter is ready before we do anything else
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive for Flutter
   await Hive.initFlutter();
 
-  // Register our new adapters
+  // Register our model adapters
   Hive.registerAdapter(MainCategoryTypeAdapter());
   Hive.registerAdapter(TransactionAdapter());
+  Hive.registerAdapter(SubCategoryAdapter());
 
-  // We'll open a second box just for transactions
+  // Open all the boxes we need for our data
   await Hive.openBox('budgetBox');
-  await Hive.openBox<Transaction>('transactionsBox'); // A typed box
+  await Hive.openBox<Transaction>('transactionsBox');
+  await Hive.openBox<SubCategory>('subCategoriesBox');
 
-  // Create the single BudgetManager instance
-  final budgetManager = BudgetManager();
-
-  // Load the data from Hive
-  budgetManager.loadData();
-
-  runApp(FourJarsApp(budgetManager: budgetManager));
+  runApp(const FourJarsApp());
 }
 
 class FourJarsApp extends StatelessWidget {
-  final BudgetManager budgetManager;
-  const FourJarsApp({super.key, required this.budgetManager});
+  const FourJarsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Four Jars',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: HomeScreen(budgetManager: budgetManager),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        useMaterial3: true,
+      ),
+      home: const HomeScreen(),
     );
   }
 }

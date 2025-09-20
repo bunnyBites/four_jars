@@ -1,20 +1,31 @@
 import 'package:four_jars/constants/app_data.dart';
 import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/models/sub_category.dart';
 import 'package:four_jars/models/transaction.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class BudgetManager {
   final _budgetBox = Hive.box('budgetBox');
   final _transactionsBox = Hive.box<Transaction>('transactionsBox');
+  final _subCategoriesBox = Hive.box<SubCategory>('subCategoriesBox');
 
   List<Map<String, dynamic>> categories = [];
   List<Transaction> transactions = [];
+  List<SubCategory> subCategories = [];
 
   void loadData() {
-    // Load transactions first
+    // 1. Load transactions and sub-categories
     transactions = _transactionsBox.values.toList();
+    subCategories = _subCategoriesBox.values.toList();
 
-    // Load saved settings or use defaults
+    // If it's the very first launch, populate sub-categories with defaults
+    if (subCategories.isEmpty) {
+      subCategories = List.from(initialSubCategories);
+      _subCategoriesBox.addAll(subCategories);
+    }
+
+    // 2. Load saved settings or use defaults
     final double totalIncome = _budgetBox.get(
       'totalIncome',
       defaultValue: 100000.0,
@@ -26,7 +37,7 @@ class BudgetManager {
       'investments': _budgetBox.get('investmentsPercentage', defaultValue: 10),
     };
 
-    // Re-calculate the budget based on settings and transactions
+    // 3. Re-calculate the budget based on the loaded data
     _calculateBudget(totalIncome: totalIncome, percentages: percentages);
   }
 
@@ -42,10 +53,8 @@ class BudgetManager {
       final type = category['type'] as MainCategoryType;
       final percentage = percentages[type.name] ?? 0;
 
-      // Calculate the allocated amount
       category['allocated'] = totalIncome * (percentage / 100);
 
-      // Calculate spent amount by summing up relevant transactions
       final relevantTransactions = transactions.where(
         (t) => t.mainCategoryId == type,
       );
@@ -54,16 +63,11 @@ class BudgetManager {
         (sum, t) => sum + t.amount,
       );
     }
-
     categories = freshCategories;
   }
 
-  // Save the user's settings to Hive
   Future<void> saveSettings({required double totalIncome}) async {
-    // For now, we'll keep the percentages fixed, but we save the income
     await _budgetBox.put('totalIncome', totalIncome);
-
-    // After saving, we must reload the data to apply the new budget
     loadData();
   }
 
@@ -71,24 +75,61 @@ class BudgetManager {
     await _transactionsBox.put(transaction.id, transaction);
   }
 
-  // UPDATED: This method is now simpler
   void addTransaction({
     required double amount,
     required String description,
     required MainCategoryType categoryType,
+    required String subCategoryId,
   }) {
     final newTransaction = Transaction(
-      id: DateTime.now().toIso8601String(),
+      id: const Uuid().v4(),
       amount: amount,
       description: description,
       date: DateTime.now(),
       mainCategoryId: categoryType,
+      subCategoryId: subCategoryId,
     );
 
     transactions.add(newTransaction);
     _saveTransaction(newTransaction);
+    loadData();
+  }
 
-    // After adding a transaction, we must reload the budget state
+  List<SubCategory> getSubCategoriesFor(MainCategoryType mainCategory) {
+    return subCategories
+        .where((sc) => sc.mainCategoryId == mainCategory)
+        .toList();
+  }
+
+  Future<void> addSubCategory({
+    required String name,
+    required MainCategoryType mainCategoryId,
+  }) async {
+    final newSubCategory = SubCategory(
+      id: const Uuid().v4(),
+      name: name,
+      mainCategoryId: mainCategoryId,
+    );
+    await _subCategoriesBox.put(newSubCategory.id, newSubCategory);
+    loadData();
+  }
+
+  Future<void> updateSubCategory({
+    required String id,
+    required String newName,
+    required MainCategoryType mainCategoryId,
+  }) async {
+    final updatedSubCategory = SubCategory(
+      id: id,
+      name: newName,
+      mainCategoryId: mainCategoryId,
+    );
+    await _subCategoriesBox.put(id, updatedSubCategory);
+    loadData();
+  }
+
+  Future<void> deleteSubCategory({required String id}) async {
+    await _subCategoriesBox.delete(id);
     loadData();
   }
 }

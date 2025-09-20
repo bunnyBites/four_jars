@@ -26,9 +26,7 @@ class CategoryDetailsScreen extends StatelessWidget {
           final transaction = transactions[index];
           return ListTile(
             title: Text(transaction.description),
-            subtitle: Text(
-              DateFormat.yMMMd().format(transaction.date),
-            ), // e.g., "Sep 20, 2025"
+            subtitle: Text(DateFormat.yMMMd().format(transaction.date)),
             trailing: Text(
               '- ₹${transaction.amount.toStringAsFixed(2)}',
               style: const TextStyle(

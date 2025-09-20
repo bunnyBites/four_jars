@@ -1,5 +1,3 @@
-// lib/screens/home/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
@@ -8,15 +6,15 @@ import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 import 'package:four_jars/screens/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final BudgetManager budgetManager;
-  const HomeScreen({super.key, required this.budgetManager});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // A map to convert color names from our constants to actual Color objects.
+  final _budgetManager = BudgetManager();
+
   final Map<String, Color> _colorMap = {
     'green': Colors.green,
     'blue': Colors.blue,
@@ -24,22 +22,26 @@ class _HomeScreenState extends State<HomeScreen> {
     'orange': Colors.orange,
   };
 
-  Future<void> _addTransaction(
+  @override
+  void initState() {
+    super.initState();
+    _budgetManager.loadData();
+  }
+
+  void _addTransaction(
     double amount,
     String description,
     MainCategoryType categoryType,
-  ) async {
-    // Tell the manager to perform the logic.
-    widget.budgetManager.addTransaction(
-      amount: amount,
-      categoryType: categoryType,
-      description: description,
-    );
-
-    // Then, simply tell the UI to rebuild itself.
-    if (mounted) {
-      setState(() {});
-    }
+    String subCategoryId,
+  ) {
+    setState(() {
+      _budgetManager.addTransaction(
+        amount: amount,
+        description: description,
+        categoryType: categoryType,
+        subCategoryId: subCategoryId,
+      );
+    });
   }
 
   void _openAddTransactionSheet() {
@@ -47,25 +49,18 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
-        // 5. PASS the _addTransaction function to the sheet
-        return AddTransactionSheet(
-          onSave: _addTransaction,
-          budgetManager: widget.budgetManager,
-        );
+        return AddTransactionSheet(onSave: _addTransaction);
       },
     );
   }
 
   void _openSettings() async {
-    // `await` will pause here until the SettingsScreen is closed
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
-
-    // When we come back, reload data and refresh the UI
     setState(() {
-      widget.budgetManager.loadData();
+      _budgetManager.loadData();
     });
   }
 
@@ -73,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Four Jars'),
+        title: const Text('My Four Jars'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
         actions: [
@@ -86,18 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: widget.budgetManager.categories.length,
+        itemCount: _budgetManager.categories.length,
         itemBuilder: (context, index) {
-          final category = widget.budgetManager.categories[index];
+          final category = _budgetManager.categories[index];
           return GestureDetector(
-            // 1. Wrap the card with GestureDetector
             onTap: () {
-              // 2. Filter the transactions for this category
-              final categoryTransactions = widget.budgetManager.transactions
+              final categoryTransactions = _budgetManager.transactions
                   .where((t) => t.mainCategoryId == category['type'])
                   .toList();
-
-              // 3. Navigate to the new screen
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -144,19 +135,17 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double progress =
-        spent / allocated; // Calculate progress from 0.0 to 1.0
+    final double progress = (allocated > 0) ? spent / allocated : 0.0;
     final double remaining = allocated - spent;
 
     return Card(
       elevation: 4.0,
-      margin: const EdgeInsets.only(bottom: 16.0), // Space between cards
+      margin: const EdgeInsets.only(bottom: 16.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Category Title
             Text(
               name,
               style: TextStyle(
@@ -166,15 +155,11 @@ class CategoryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12.0),
-
-            // Spent vs Allocated Text
             Text(
               '₹${spent.toStringAsFixed(0)} / ₹${allocated.toStringAsFixed(0)}',
               style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
             const SizedBox(height: 8.0),
-
-            // Progress Bar
             LinearProgressIndicator(
               value: progress,
               minHeight: 12.0,
@@ -183,8 +168,6 @@ class CategoryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(6.0),
             ),
             const SizedBox(height: 8.0),
-
-            // Remaining Amount Text
             Align(
               alignment: Alignment.centerRight,
               child: Text(

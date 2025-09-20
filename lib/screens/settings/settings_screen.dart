@@ -1,7 +1,8 @@
-// lib/screens/settings/settings_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
+import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/screens/settings/sub_category_list_screen.dart';
+import 'package:hive/hive.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -12,7 +13,18 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _incomeController = TextEditingController();
-  // TODO: Load saved values and implement save logic
+  final BudgetManager _budgetManager = BudgetManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _budgetManager.loadData();
+    // Load existing income to show in the text field
+    final currentIncome = Hive.box(
+      'budgetBox',
+    ).get('totalIncome', defaultValue: 100000.0);
+    _incomeController.text = currentIncome.toStringAsFixed(0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,19 +51,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            const Divider(),
+            const SizedBox(height: 16),
             Text(
-              'Allocation Percentages',
+              'Manage Sub-categories',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            // We will add percentage sliders/fields here later
-            const Spacer(), // Pushes the save button to the bottom
+            const SizedBox(height: 8),
+            ...MainCategoryType.values.map((category) {
+              return ListTile(
+                title: Text(
+                  category.name[0].toUpperCase() + category.name.substring(1),
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          SubCategoryListScreen(mainCategory: category),
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+            const Spacer(),
             ElevatedButton(
               onPressed: () {
                 final income = double.tryParse(_incomeController.text);
                 if (income != null) {
-                  // This is a temporary way to access the manager.
-                  // We'll improve this with proper state management later.
-                  BudgetManager().saveSettings(totalIncome: income);
+                  _budgetManager.saveSettings(totalIncome: income);
                 }
                 Navigator.pop(context);
               },
