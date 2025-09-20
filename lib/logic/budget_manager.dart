@@ -15,7 +15,6 @@ class BudgetManager {
   List<SubCategory> subCategories = [];
 
   void loadData() {
-    // 1. Load transactions and sub-categories
     transactions = _transactionsBox.values.toList();
     subCategories = _subCategoriesBox.values.toList();
 
@@ -25,11 +24,11 @@ class BudgetManager {
       _subCategoriesBox.addAll(subCategories);
     }
 
-    // 2. Load saved settings or use defaults
     final double totalIncome = _budgetBox.get(
       'totalIncome',
       defaultValue: 100000.0,
     );
+
     final Map<String, int> percentages = {
       'needs': _budgetBox.get('needsPercentage', defaultValue: 50),
       'wants': _budgetBox.get('wantsPercentage', defaultValue: 30),
@@ -66,8 +65,16 @@ class BudgetManager {
     categories = freshCategories;
   }
 
-  Future<void> saveSettings({required double totalIncome}) async {
+  Future<void> saveSettings({
+    required double totalIncome,
+    required Map<String, int> percentages,
+  }) async {
     await _budgetBox.put('totalIncome', totalIncome);
+    await _budgetBox.put('needsPercentage', percentages['needs']);
+    await _budgetBox.put('wantsPercentage', percentages['wants']);
+    await _budgetBox.put('savingsPercentage', percentages['savings']);
+    await _budgetBox.put('investmentsPercentage', percentages['investments']);
+
     loadData();
   }
 

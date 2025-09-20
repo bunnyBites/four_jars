@@ -67,91 +67,100 @@ class _AddTransactionSheetState extends State<AddTransactionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // This padding dynamically adjusts based on what's covering the screen (like the keyboard)
     final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardSpace),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Add New Transaction',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            TextField(
-              controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: const InputDecoration(
-                labelText: 'Amount',
-                prefixText: '₹ ',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<MainCategoryType>(
-              value: _selectedMainCategory,
-              hint: const Text('Select Category'),
-              items: MainCategoryType.values.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(
-                    category.name[0].toUpperCase() + category.name.substring(1),
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
+        child: SingleChildScrollView(
+          child: Padding(
+            // UPDATE the padding to include keyboard space
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardSpace),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Add New Transaction',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: _amountController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                );
-              }).toList(),
-              onChanged: _onMainCategoryChanged,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount',
+                    prefixText: '₹ ',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<MainCategoryType>(
+                  initialValue: _selectedMainCategory,
+                  hint: const Text('Select Category'),
+                  items: MainCategoryType.values.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(
+                        category.name[0].toUpperCase() +
+                            category.name.substring(1),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: _onMainCategoryChanged,
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedSubCategoryId,
+                  hint: const Text('Select Sub-category'),
+                  items: _availableSubCategories.map((subCategory) {
+                    return DropdownMenuItem(
+                      value: subCategory.id,
+                      child: Text(subCategory.name),
+                    );
+                  }).toList(),
+                  onChanged: _availableSubCategories.isEmpty
+                      ? null
+                      : (newValue) {
+                          setState(() {
+                            _selectedSubCategoryId = newValue;
+                          });
+                        },
+                  decoration: const InputDecoration(
+                    labelText: 'Sub-category',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _submitData,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.teal,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Save Transaction'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedSubCategoryId,
-              hint: const Text('Select Sub-category'),
-              items: _availableSubCategories.map((subCategory) {
-                return DropdownMenuItem(
-                  value: subCategory.id,
-                  child: Text(subCategory.name),
-                );
-              }).toList(),
-              onChanged: _availableSubCategories.isEmpty
-                  ? null
-                  : (newValue) {
-                      setState(() {
-                        _selectedSubCategoryId = newValue;
-                      });
-                    },
-              decoration: const InputDecoration(
-                labelText: 'Sub-category',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _submitData,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Save Transaction'),
-            ),
-          ],
+          ),
         ),
       ),
     );
