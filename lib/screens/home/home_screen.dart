@@ -6,16 +6,14 @@ import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final BudgetManager budgetManager;
+  const HomeScreen({super.key, required this.budgetManager});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // The UI now holds an instance of our logic manager.
-  final _budgetManager = BudgetManager();
-
   // A map to convert color names from our constants to actual Color objects.
   final Map<String, Color> _colorMap = {
     'green': Colors.green,
@@ -24,16 +22,21 @@ class _HomeScreenState extends State<HomeScreen> {
     'orange': Colors.orange,
   };
 
-  void _addTransaction(
+  Future<void> _addTransaction(
     double amount,
     String description,
     MainCategoryType categoryType,
-  ) {
+  ) async {
     // Tell the manager to perform the logic.
-    _budgetManager.addTransaction(amount: amount, categoryType: categoryType);
+    await widget.budgetManager.addTransaction(
+      amount: amount,
+      categoryType: categoryType,
+    );
 
     // Then, simply tell the UI to rebuild itself.
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _openAddTransactionSheet() {
@@ -42,7 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       builder: (ctx) {
         // 5. PASS the _addTransaction function to the sheet
-        return AddTransactionSheet(onSave: _addTransaction);
+        return AddTransactionSheet(
+          onSave: _addTransaction,
+          budgetManager: widget.budgetManager,
+        );
       },
     );
   }
@@ -51,15 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Four Jars'),
+        title: const Text('Four Jars'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
-        itemCount: _budgetManager.categories.length,
+        itemCount: widget.budgetManager.categories.length,
         itemBuilder: (context, index) {
-          final category = _budgetManager.categories[index];
+          final category = widget.budgetManager.categories[index];
           return CategoryCard(
             name: category['name'],
             allocated: category['allocated'],

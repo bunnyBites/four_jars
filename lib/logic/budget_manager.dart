@@ -1,27 +1,45 @@
-// lib/logic/budget_manager.dart
-
 import 'package:four_jars/constants/app_data.dart';
 import 'package:four_jars/models/main_category_type.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class BudgetManager {
-  // The manager holds the current state of the categories.
-  // It's initialized with a copy of our constant data.
-  final List<Map<String, dynamic>> categories = List.from(
-    initialCategoriesData,
-  );
+  // Get our opened Hive box
+  final _budgetBox = Hive.box('budgetBox');
+  List<Map<String, dynamic>> categories = [];
 
-  // This method contains the pure logic for adding a transaction.
-  // It knows how to find a category and update its 'spent' value.
-  void addTransaction({
+  // NEW: Load data from the database
+  void loadData() {
+    // Check if the box has data (i.e., not the first time opening the app)
+    final savedData = _budgetBox.get('CATEGORIES');
+
+    if (savedData != null) {
+      // If there is saved data, load it
+      categories = List<Map<String, dynamic>>.from(
+        savedData.map((item) => Map<String, dynamic>.from(item)),
+      );
+    } else {
+      // Otherwise, it's the first launch, so load the initial constant data
+      categories = List.from(initialCategoriesData);
+    }
+  }
+
+  // NEW: Save data to the database
+  Future<void> _saveData() async {
+    await _budgetBox.put('CATEGORIES', categories);
+  }
+
+  // UPDATED: The addTransaction method now saves its changes
+  Future<void> addTransaction({
     required double amount,
     required MainCategoryType categoryType,
-  }) {
+  }) async {
     final categoryIndex = categories.indexWhere(
       (cat) => cat['type'] == categoryType,
     );
 
     if (categoryIndex != -1) {
       categories[categoryIndex]['spent'] += amount;
+      await _saveData(); // Save the updated list to Hive
     }
   }
 }
