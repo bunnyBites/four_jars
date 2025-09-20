@@ -5,6 +5,7 @@ import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
+import 'package:four_jars/screens/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final BudgetManager budgetManager;
@@ -55,6 +56,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openSettings() async {
+    // `await` will pause here until the SettingsScreen is closed
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+
+    // When we come back, reload data and refresh the UI
+    setState(() {
+      widget.budgetManager.loadData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Four Jars'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
+            tooltip: 'Settings',
+          ),
+        ],
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16.0),
