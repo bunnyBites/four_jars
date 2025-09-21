@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/screens/category_details/category_details.dart';
+import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
+import 'package:four_jars/models/main_category_type.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -51,15 +53,31 @@ class HomeScreen extends StatelessWidget {
                 final category = controller.categories[index];
                 return GestureDetector(
                   onTap: () {
+                    // Get the MainCategoryType from the category name
+                    final MainCategoryType categoryType = MainCategoryType
+                        .values
+                        .firstWhere(
+                          (type) => type.name == category['name'].toLowerCase(),
+                        );
+
+                    // Filter transactions for this category
                     final categoryTransactions = controller.transactions
-                        .where((t) => t.mainCategoryId == category['type'])
+                        .where(
+                          (transaction) =>
+                              transaction.mainCategoryId == categoryType,
+                        )
                         .toList();
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => CategoryDetailsScreen(
-                          categoryName: category['name'],
-                          transactions: categoryTransactions,
+                        builder: (context) => ChangeNotifierProvider(
+                          create: (context) => CategoryDetailsController(
+                            existingTransactions: categoryTransactions,
+                          ),
+                          child: CategoryDetailsScreen(
+                            categoryName: category['name'],
+                          ),
                         ),
                       ),
                     );

@@ -1,74 +1,24 @@
-// lib/screens/category_details/category_details_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/transaction.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
+import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class CategoryDetailsScreen extends StatefulWidget {
+class CategoryDetailsScreen extends StatelessWidget {
   final String categoryName;
-  final List<Transaction> transactions;
 
-  const CategoryDetailsScreen({
-    super.key,
-    required this.categoryName,
-    required this.transactions,
-  });
-
-  @override
-  State<CategoryDetailsScreen> createState() => _CategoryDetailsScreenState();
-}
-
-class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
-  late List<Transaction> _transactions;
-  final BudgetManager _budgetManager = BudgetManager();
-
-  @override
-  void initState() {
-    super.initState();
-    _transactions = widget.transactions;
-  }
-
-  void _editTransaction(Transaction transaction) async {
-    final updatedTransaction = await showModalBottomSheet<Transaction>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => ChangeNotifierProvider(
-        // Provide controller with existing data for edit mode
-        create: (_) =>
-            AddTransactionController(existingTransaction: transaction),
-        child: const AddTransactionSheet(),
-      ),
-    );
-
-    if (updatedTransaction != null) {
-      await _budgetManager.updateTransaction(
-        updatedTransaction: updatedTransaction,
-      );
-      // Refresh the list after editing
-      setState(() {
-        final index = _transactions.indexWhere(
-          (t) => t.id == updatedTransaction.id,
-        );
-        if (index != -1) {
-          _transactions[index] = updatedTransaction;
-        }
-      });
-    }
-  }
+  const CategoryDetailsScreen({super.key, required this.categoryName});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Provider.of<CategoryDetailsController>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoryName),
+        title: Text(categoryName),
         backgroundColor: Colors.blueGrey[800],
         foregroundColor: Colors.white,
       ),
-      body: _transactions.isEmpty
+      body: controller.transactions.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -109,9 +59,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: _transactions.length,
+              itemCount: controller.transactions.length,
               itemBuilder: (context, index) {
-                final transaction = _transactions[index];
+                final transaction = controller.transactions[index];
                 return Dismissible(
                   key: ValueKey(transaction.id),
                   background: Container(
@@ -122,12 +72,7 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                   ),
                   direction: DismissDirection.endToStart,
                   onDismissed: (direction) async {
-                    await _budgetManager.deleteTransaction(
-                      transactionId: transaction.id,
-                    );
-                    setState(() {
-                      _transactions.removeAt(index);
-                    });
+                    await controller.deleteTransaction(transaction);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${transaction.description} deleted'),
@@ -145,7 +90,10 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    onTap: () => _editTransaction(transaction), // Tap to edit
+                    onTap: () => controller.editTransaction(
+                      context,
+                      transaction,
+                    ), // Tap to edit
                   ),
                 );
               },

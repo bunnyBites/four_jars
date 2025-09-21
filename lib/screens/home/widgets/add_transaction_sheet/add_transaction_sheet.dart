@@ -8,7 +8,6 @@ class AddTransactionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Consumer rebuilds the UI when the controller calls notifyListeners()
     return Consumer<AddTransactionController>(
       builder: (context, controller, child) {
         final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
