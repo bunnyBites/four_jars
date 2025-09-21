@@ -92,41 +92,90 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _subCategories.length,
-        itemBuilder: (context, index) {
-          final subCategory = _subCategories[index];
-          return Dismissible(
-            key: ValueKey(subCategory.id),
-            background: Container(
-              color: Colors.red,
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) async {
-              await _budgetManager.deleteSubCategory(id: subCategory.id);
-              _loadSubCategories();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${subCategory.name} deleted'),
-                  duration: const Duration(seconds: 2),
-                ),
-              );
-            },
-            child: ListTile(
-              title: Text(subCategory.name),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit, color: Colors.grey),
-                onPressed: () =>
-                    _showAddEditDialog(existingSubCategory: subCategory),
-                tooltip: 'Edit Sub-category',
+      body: _subCategories.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.category_outlined,
+                    size: 80,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No Sub-categories Yet',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tap the + button to add your first sub-category',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddEditDialog(),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Sub-category'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
+            )
+          : ListView.builder(
+              itemCount: _subCategories.length,
+              itemBuilder: (context, index) {
+                final subCategory = _subCategories[index];
+                return Dismissible(
+                  key: ValueKey(subCategory.id),
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) async {
+                    // Remove from local state first to prevent tree issues
+                    final deletedSubCategory = subCategory;
+                    setState(() {
+                      _subCategories.removeAt(index);
+                    });
+
+                    // Then delete from database
+                    await _budgetManager.deleteSubCategory(
+                      id: deletedSubCategory.id,
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${deletedSubCategory.name} deleted'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: ListTile(
+                    title: Text(subCategory.name),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.grey),
+                      onPressed: () =>
+                          _showAddEditDialog(existingSubCategory: subCategory),
+                      tooltip: 'Edit Sub-category',
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
