@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/models/transaction.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
 import 'package:four_jars/screens/settings/settings_screen.dart';
+import 'package:provider/provider.dart';
 
 class HomeController extends ChangeNotifier {
   final BudgetManager _budgetManager = BudgetManager();
@@ -38,27 +40,28 @@ class HomeController extends ChangeNotifier {
     notifyListeners(); // This is the new setState()
   }
 
-  void openAddTransactionSheet(BuildContext context) {
-    showModalBottomSheet(
+  void openAddTransactionSheet(BuildContext context) async {
+    final newTransaction = await showModalBottomSheet<Transaction>(
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
-        return AddTransactionSheet(
-          onSave: (transaction) {
-            // Updated onSave
-            // We will create/update transaction in the manager now
-            _budgetManager.addTransaction(
-              // Simplified for example, should be add/update
-              amount: transaction.amount,
-              description: transaction.description,
-              categoryType: transaction.mainCategoryId,
-              subCategoryId: transaction.subCategoryId,
-            );
-            notifyListeners();
-          },
+        // Provide the new controller to the sheet
+        return ChangeNotifierProvider(
+          create: (_) => AddTransactionController(),
+          child: const AddTransactionSheet(),
         );
       },
     );
+
+    if (newTransaction != null) {
+      _budgetManager.addTransaction(
+        amount: newTransaction.amount,
+        description: newTransaction.description,
+        categoryType: newTransaction.mainCategoryId,
+        subCategoryId: newTransaction.subCategoryId,
+      );
+      notifyListeners();
+    }
   }
 
   void openSettings(BuildContext context) async {

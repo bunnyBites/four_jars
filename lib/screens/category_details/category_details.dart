@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/transaction.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class CategoryDetailsScreen extends StatefulWidget {
   final String categoryName;
@@ -30,28 +32,32 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
     _transactions = widget.transactions;
   }
 
-  void _editTransaction(Transaction transaction) {
-    showModalBottomSheet(
+  void _editTransaction(Transaction transaction) async {
+    final updatedTransaction = await showModalBottomSheet<Transaction>(
       context: context,
       isScrollControlled: true,
-      builder: (_) => AddTransactionSheet(
-        existingTransaction: transaction,
-        onSave: (updatedTransaction) async {
-          await _budgetManager.updateTransaction(
-            updatedTransaction: updatedTransaction,
-          );
-          // Refresh the list after editing
-          setState(() {
-            final index = _transactions.indexWhere(
-              (t) => t.id == updatedTransaction.id,
-            );
-            if (index != -1) {
-              _transactions[index] = updatedTransaction;
-            }
-          });
-        },
+      builder: (_) => ChangeNotifierProvider(
+        // Provide controller with existing data for edit mode
+        create: (_) =>
+            AddTransactionController(existingTransaction: transaction),
+        child: const AddTransactionSheet(),
       ),
     );
+
+    if (updatedTransaction != null) {
+      await _budgetManager.updateTransaction(
+        updatedTransaction: updatedTransaction,
+      );
+      // Refresh the list after editing
+      setState(() {
+        final index = _transactions.indexWhere(
+          (t) => t.id == updatedTransaction.id,
+        );
+        if (index != -1) {
+          _transactions[index] = updatedTransaction;
+        }
+      });
+    }
   }
 
   @override
