@@ -1,76 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/category_details/category_details.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet.dart';
+import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
-import 'package:four_jars/screens/settings/settings_screen.dart';
+import 'package:provider/provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  final _budgetManager = BudgetManager();
-
-  final Map<String, Color> _colorMap = {
-    'green': Colors.green,
-    'blue': Colors.blue,
-    'purple': Colors.purple,
-    'orange': Colors.orange,
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _budgetManager.loadData();
-  }
-
-  void _addTransaction(Transaction transaction) {
-    setState(() {
-      _budgetManager.addTransaction(
-        amount: transaction.amount,
-        description: transaction.description,
-        categoryType: transaction.mainCategoryId,
-        subCategoryId: transaction.subCategoryId,
-      );
-    });
-  }
-
-  void _openAddTransactionSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) {
-        return AddTransactionSheet(onSave: _addTransaction);
-      },
-    );
-  }
-
-  void _openSettings() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SettingsScreen()),
-    );
-    setState(() {
-      _budgetManager.loadData();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Access the controller
+    final controller = Provider.of<HomeController>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Four Jars'),
+        title: const Text('My Four Jars'),
         backgroundColor: Colors.blueGrey[900],
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
+            onPressed: () =>
+                controller.openSettings(context), // Call controller method
             tooltip: 'Settings',
           ),
         ],
@@ -79,36 +30,30 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
+            // Use the controller's data
             child: SpendingChart(
-              categories: _budgetManager.categories,
-              colorMap: _colorMap,
+              categories: controller.categories,
+              colorMap: controller.colorMap,
             ),
           ),
           const Divider(height: 1),
           Expanded(
-            // --- CHANGE 1: Replace ListView.builder with GridView.builder ---
             child: GridView.builder(
               padding: const EdgeInsets.all(16.0),
-              // This delegate defines the grid's layout
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 columns
-                crossAxisSpacing: 16, // Horizontal space between items
-                mainAxisSpacing: 16, // Vertical space between items
-                childAspectRatio: 1, // Makes the items square (width == height)
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1,
               ),
-              itemCount: _budgetManager.categories.length,
+              itemCount: controller.categories.length,
               itemBuilder: (context, index) {
-                final category = _budgetManager.categories[index];
+                final category = controller.categories[index];
                 return GestureDetector(
                   onTap: () {
-                    final categoryTransactions = _budgetManager.transactions
+                    final categoryTransactions = controller.transactions
                         .where((t) => t.mainCategoryId == category['type'])
                         .toList();
-
-                    print(
-                      'Found ${categoryTransactions.length} transactions for this category.',
-                    );
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -123,7 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     name: category['name'],
                     allocated: category['allocated'],
                     spent: category['spent'],
-                    color: _colorMap[category['colorName']] ?? Colors.grey,
+                    color:
+                        controller.colorMap[category['colorName']] ??
+                        Colors.grey,
                   ),
                 );
               },
@@ -132,7 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _openAddTransactionSheet,
+        onPressed: () => controller.openAddTransactionSheet(
+          context,
+        ), // Call controller method
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         tooltip: 'Add Transaction',
@@ -142,9 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// In lib/screens/home/home_screen.dart
-
-// --- Updated CategoryCard with Piggy Bank Icon ---
 class CategoryCard extends StatelessWidget {
   final String name;
   final double allocated;

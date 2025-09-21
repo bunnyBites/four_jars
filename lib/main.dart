@@ -3,7 +3,9 @@ import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/models/sub_category.dart';
 import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/home_screen.dart';
+import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   // Ensure Flutter is ready before we do anything else
@@ -22,7 +24,12 @@ void main() async {
   await Hive.openBox<Transaction>('transactionsBox');
   await Hive.openBox<SubCategory>('subCategoriesBox');
 
-  runApp(const FourJarsApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => HomeController(),
+      child: const FourJarsApp(),
+    ),
+  );
 }
 
 class FourJarsApp extends StatelessWidget {
