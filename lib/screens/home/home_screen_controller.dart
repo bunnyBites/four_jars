@@ -8,7 +8,7 @@ import 'package:four_jars/screens/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 class HomeController extends ChangeNotifier {
-  final BudgetManager _budgetManager = BudgetManager();
+  final BudgetManager _budgetManager;
 
   // Expose the manager's data through the controller
   List<Map<String, dynamic>> get categories => _budgetManager.categories;
@@ -21,8 +21,13 @@ class HomeController extends ChangeNotifier {
     'orange': Colors.orange,
   };
 
-  HomeController() {
+  HomeController(this._budgetManager) {
     _budgetManager.loadData();
+  }
+
+  void refreshData() {
+    _budgetManager.loadData();
+    notifyListeners();
   }
 
   void addTransaction(

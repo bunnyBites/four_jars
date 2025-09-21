@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
-import 'package:intl/intl.dart';
+
 import 'package:provider/provider.dart';
 
 class CategoryDetailsScreen extends StatelessWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/models/sub_category.dart';
 import 'package:four_jars/models/transaction.dart';
@@ -25,8 +26,18 @@ void main() async {
   await Hive.openBox<SubCategory>('subCategoriesBox');
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => HomeController(),
+    MultiProvider(
+      providers: [
+        // 1. Provide a single instance of BudgetManager
+        Provider<BudgetManager>(create: (context) => BudgetManager()),
+        // 2. Our existing HomeController provider
+        ChangeNotifierProvider(
+          create: (context) => HomeController(
+            // It now reads the BudgetManager from the provider
+            context.read<BudgetManager>(),
+          ),
+        ),
+      ],
       child: const FourJarsApp(),
     ),
   );

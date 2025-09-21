@@ -3,7 +3,7 @@ import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
-import 'package:four_jars/models/main_category_type.dart';
+
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -52,27 +52,17 @@ class HomeScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final category = controller.categories[index];
                 return GestureDetector(
-                  onTap: () {
-                    // Get the MainCategoryType from the category name
-                    final MainCategoryType categoryType = MainCategoryType
-                        .values
-                        .firstWhere(
-                          (type) => type.name == category['name'].toLowerCase(),
-                        );
-
-                    // Filter transactions for this category
+                  onTap: () async {
                     final categoryTransactions = controller.transactions
-                        .where(
-                          (transaction) =>
-                              transaction.mainCategoryId == categoryType,
-                        )
+                        .where((t) => t.mainCategoryId == category['type'])
                         .toList();
 
-                    Navigator.push(
+                    // 'await' here will pause until the details screen is closed
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => ChangeNotifierProvider(
-                          create: (context) => CategoryDetailsController(
+                          create: (_) => CategoryDetailsController(
                             existingTransactions: categoryTransactions,
                           ),
                           child: CategoryDetailsScreen(
@@ -81,6 +71,9 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     );
+
+                    // When we come back, call the new refresh method
+                    controller.refreshData();
                   },
                   child: CategoryCard(
                     name: category['name'],
