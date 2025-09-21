@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/models/sub_category.dart';
+import 'package:provider/provider.dart';
 
 class SubCategoryListScreen extends StatefulWidget {
   final MainCategoryType mainCategory;
@@ -12,17 +13,17 @@ class SubCategoryListScreen extends StatefulWidget {
 }
 
 class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
-  final BudgetManager _budgetManager = BudgetManager();
+  late BudgetManager _budgetManager;
   late List<SubCategory> _subCategories;
 
   @override
   void initState() {
     super.initState();
+    _budgetManager = context.read<BudgetManager>();
     _loadSubCategories();
   }
 
   void _loadSubCategories() {
-    _budgetManager.loadData();
     setState(() {
       _subCategories = _budgetManager.getSubCategoriesFor(widget.mainCategory);
     });
@@ -47,7 +48,11 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () {
+              if (mounted) {
+                Navigator.pop(ctx);
+              }
+            },
             child: const Text('Cancel'),
           ),
           TextButton(
@@ -66,8 +71,10 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
                   mainCategoryId: widget.mainCategory,
                 );
               }
-              _loadSubCategories();
-              Navigator.pop(ctx);
+              if (mounted) {
+                _loadSubCategories();
+                Navigator.pop(ctx);
+              }
             },
             child: const Text('Save'),
           ),
@@ -87,7 +94,11 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _showAddEditDialog(),
+            onPressed: () {
+              if (mounted) {
+                _showAddEditDialog();
+              }
+            },
             tooltip: 'Add Sub-category',
           ),
         ],
@@ -119,7 +130,11 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () => _showAddEditDialog(),
+                    onPressed: () {
+                      if (mounted) {
+                        _showAddEditDialog();
+                      }
+                    },
                     icon: const Icon(Icons.add),
                     label: const Text('Add Sub-category'),
                     style: ElevatedButton.styleFrom(
@@ -157,19 +172,24 @@ class _SubCategoryListScreenState extends State<SubCategoryListScreen> {
                       id: deletedSubCategory.id,
                     );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${deletedSubCategory.name} deleted'),
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${deletedSubCategory.name} deleted'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
                   },
                   child: ListTile(
                     title: Text(subCategory.name),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit, color: Colors.grey),
-                      onPressed: () =>
-                          _showAddEditDialog(existingSubCategory: subCategory),
+                      onPressed: () {
+                        if (mounted) {
+                          _showAddEditDialog(existingSubCategory: subCategory);
+                        }
+                      },
                       tooltip: 'Edit Sub-category',
                     ),
                   ),
