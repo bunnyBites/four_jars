@@ -20,7 +20,10 @@ class BudgetManager {
 
     // If it's the very first launch, populate sub-categories with defaults
     if (subCategories.isEmpty) {
-      subCategories = List.from(initialSubCategories);
+      final existingIds = _subCategoriesBox.values.map((sc) => sc.id).toSet();
+      subCategories = initialSubCategories
+          .where((sc) => !existingIds.contains(sc.id))
+          .toList();
       _subCategoriesBox.addAll(subCategories);
     }
 
@@ -132,6 +135,7 @@ class BudgetManager {
       mainCategoryId: mainCategoryId,
     );
     await _subCategoriesBox.put(id, updatedSubCategory);
+    // After any change, always reload the budget to recalculate totals
     loadData();
   }
 

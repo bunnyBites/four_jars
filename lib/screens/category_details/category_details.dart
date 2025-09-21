@@ -82,7 +82,14 @@ class CategoryDetailsScreen extends StatelessWidget {
                   },
                   child: ListTile(
                     title: Text(transaction.description),
-                    subtitle: Text(DateFormat.yMMMd().format(transaction.date)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sub-category: ${controller.getSubCategoryName(transaction.subCategoryId)}',
+                        ),
+                      ],
+                    ),
                     trailing: Text(
                       '- ₹${transaction.amount.toStringAsFixed(2)}',
                       style: const TextStyle(

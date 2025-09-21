@@ -65,7 +65,9 @@ class AddTransactionSheet extends StatelessWidget {
                       ),
                     );
                   }).toList(),
-                  onChanged: controller.onMainCategoryChanged,
+                  onChanged: controller.isEditing
+                      ? null
+                      : controller.onMainCategoryChanged,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     border: OutlineInputBorder(),

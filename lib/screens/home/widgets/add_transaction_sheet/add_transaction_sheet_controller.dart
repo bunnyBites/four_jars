@@ -40,7 +40,11 @@ class AddTransactionController extends ChangeNotifier {
 
     selectedMainCategory = newValue;
     availableSubCategories = _budgetManager.getSubCategoriesFor(newValue);
-    selectedSubCategoryId = null; // Reset sub-category selection
+    if (availableSubCategories.length == 1) {
+      selectedSubCategoryId = availableSubCategories.first.id;
+    } else {
+      selectedSubCategoryId = null; // Reset sub-category selection
+    }
 
     notifyListeners(); // Tell the UI to rebuild
   }
