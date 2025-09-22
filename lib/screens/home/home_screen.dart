@@ -22,8 +22,7 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () =>
-                controller.openSettings(context), // Call controller method
+            onPressed: () => controller.openSettings(context),
             tooltip: 'Settings',
           ),
         ],
@@ -90,9 +89,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.openAddTransactionSheet(
-          context,
-        ), // Call controller method
+        onPressed: () => controller.openAddTransactionSheet(context),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         tooltip: 'Add Transaction',

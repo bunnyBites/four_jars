@@ -42,7 +42,7 @@ class HomeController extends ChangeNotifier {
       categoryType: categoryType,
       subCategoryId: subCategoryId,
     );
-    notifyListeners(); // This is the new setState()
+    notifyListeners();
   }
 
   void openAddTransactionSheet(BuildContext context) async {
@@ -50,7 +50,6 @@ class HomeController extends ChangeNotifier {
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
-        // Provide the new controller to the sheet
         return ChangeNotifierProvider(
           create: (_) => AddTransactionController(),
           child: const AddTransactionSheet(),

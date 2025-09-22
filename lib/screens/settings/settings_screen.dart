@@ -25,7 +25,6 @@ class _SettingsScreenState extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Budget Settings')),
-      // Use a ListView instead of a Column to ensure it's always scrollable
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -96,7 +95,7 @@ class _SettingsScreenState extends StatelessWidget {
               },
             );
           }),
-          const SizedBox(height: 32), // Replaced Spacer with a fixed SizedBox
+          const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
               controller.saveSettings();
@@ -114,7 +113,7 @@ class _SettingsScreenState extends StatelessWidget {
     );
   }
 
-  // Helper widget to avoid repeating code for each slider
+  // Helper widget for slider
   Widget _buildPercentageSlider({
     required String title,
     required double value,

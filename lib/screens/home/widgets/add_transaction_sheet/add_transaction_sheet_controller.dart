@@ -46,7 +46,7 @@ class AddTransactionController extends ChangeNotifier {
       selectedSubCategoryId = null; // Reset sub-category selection
     }
 
-    notifyListeners(); // Tell the UI to rebuild
+    notifyListeners();
   }
 
   void onSubCategoryChanged(String? newValue) {
@@ -66,8 +66,6 @@ class AddTransactionController extends ChangeNotifier {
         selectedSubCategoryId == null) {
       return null; // Return null if validation fails
     }
-
-    print(selectedSubCategoryId);
 
     return Transaction(
       id: isEditing ? existingTransaction!.id : const Uuid().v4(),
