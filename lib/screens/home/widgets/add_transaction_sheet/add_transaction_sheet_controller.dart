@@ -67,6 +67,8 @@ class AddTransactionController extends ChangeNotifier {
       return null; // Return null if validation fails
     }
 
+    print(selectedSubCategoryId);
+
     return Transaction(
       id: isEditing ? existingTransaction!.id : const Uuid().v4(),
       amount: enteredAmount,

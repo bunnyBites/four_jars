@@ -3,6 +3,7 @@ import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
+import 'package:four_jars/logic/budget_manager.dart';
 
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Access the controller
     final controller = Provider.of<HomeController>(context);
 
     return Scaffold(
@@ -32,7 +32,6 @@ class HomeScreen extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            // Use the controller's data
             child: SpendingChart(
               categories: controller.categories,
               colorMap: controller.colorMap,
@@ -62,7 +61,8 @@ class HomeScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ChangeNotifierProvider(
-                          create: (_) => CategoryDetailsController(
+                          create: (context) => CategoryDetailsController(
+                            budgetManager: context.read<BudgetManager>(),
                             existingTransactions: categoryTransactions,
                           ),
                           child: CategoryDetailsScreen(

@@ -9,12 +9,15 @@ import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transac
 import 'package:provider/provider.dart';
 
 class CategoryDetailsController extends ChangeNotifier {
-  final BudgetManager _budgetManager = BudgetManager();
+  final BudgetManager _budgetManager;
 
   late List<Transaction> _transactions;
   List<Transaction> get transactions => _transactions;
 
   String getSubCategoryName(String subCategoryId) {
+    print(subCategoryId);
+    print(_budgetManager.subCategories);
+
     final subCategory = _budgetManager.subCategories.firstWhere(
       (sc) => sc.id == subCategoryId,
       orElse: () => SubCategory(
@@ -26,7 +29,11 @@ class CategoryDetailsController extends ChangeNotifier {
     return subCategory.name;
   }
 
-  CategoryDetailsController({required List<Transaction> existingTransactions}) {
+  CategoryDetailsController({
+    required BudgetManager budgetManager,
+    required List<Transaction> existingTransactions,
+  }) : _budgetManager = budgetManager {
+    _budgetManager.loadData();
     _transactions = existingTransactions;
   }
 
