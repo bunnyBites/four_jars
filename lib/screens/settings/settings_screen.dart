@@ -21,7 +21,7 @@ class _SettingsScreenState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<SettingsController>();
+    final controller = context.watch<SettingsController>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Budget Settings')),

@@ -15,9 +15,6 @@ class CategoryDetailsController extends ChangeNotifier {
   List<Transaction> get transactions => _transactions;
 
   String getSubCategoryName(String subCategoryId) {
-    print(subCategoryId);
-    print(_budgetManager.subCategories);
-
     final subCategory = _budgetManager.subCategories.firstWhere(
       (sc) => sc.id == subCategoryId,
       orElse: () => SubCategory(
