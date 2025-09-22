@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/screens/settings/sub_category_list_screen.dart';
+import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_screen.dart';
 import 'package:hive/hive.dart';
 
 class SettingsScreen extends StatefulWidget {
