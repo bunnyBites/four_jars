@@ -24,91 +24,134 @@ class _SettingsScreenState extends StatelessWidget {
     final controller = context.watch<SettingsController>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Budget Settings')),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          TextField(
-            controller: controller.incomeController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'My Total Monthly Income',
-              prefixText: '₹ ',
-              border: OutlineInputBorder(),
-            ),
+      appBar: _buildAppBar(),
+      body: _buildBody(context, controller),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(title: const Text('My Budget Settings'));
+  }
+
+  Widget _buildBody(BuildContext context, SettingsController controller) {
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        _buildIncomeField(controller),
+        const SizedBox(height: 24),
+        _buildAllocationSection(context, controller),
+        const SizedBox(height: 24),
+        const Divider(),
+        const SizedBox(height: 16),
+        _buildSubCategoriesSection(context),
+        const SizedBox(height: 32),
+        _buildSaveButton(controller),
+      ],
+    );
+  }
+
+  Widget _buildIncomeField(SettingsController controller) {
+    return TextField(
+      controller: controller.incomeController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: const InputDecoration(
+        labelText: 'My Total Monthly Income',
+        prefixText: '₹ ',
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildAllocationSection(
+    BuildContext context,
+    SettingsController controller,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Allocation Percentages',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        _buildPercentageSlider(
+          title: 'Needs',
+          value: controller.getPercentage(MainCategoryType.needs),
+          color: Colors.green,
+          onChanged: (val) =>
+              controller.updatePercentages(MainCategoryType.needs, val),
+        ),
+        _buildPercentageSlider(
+          title: 'Wants',
+          value: controller.getPercentage(MainCategoryType.wants),
+          color: Colors.blue,
+          onChanged: (val) =>
+              controller.updatePercentages(MainCategoryType.wants, val),
+        ),
+        _buildPercentageSlider(
+          title: 'Savings',
+          value: controller.getPercentage(MainCategoryType.savings),
+          color: Colors.purple,
+          onChanged: (val) =>
+              controller.updatePercentages(MainCategoryType.savings, val),
+        ),
+        _buildPercentageSlider(
+          title: 'Investments',
+          value: controller.getPercentage(MainCategoryType.investments),
+          color: Colors.orange,
+          onChanged: (val) =>
+              controller.updatePercentages(MainCategoryType.investments, val),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubCategoriesSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Manage Sub-categories',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        ...MainCategoryType.values.map(
+          (category) => _buildCategoryListTile(context, category),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryListTile(
+    BuildContext context,
+    MainCategoryType category,
+  ) {
+    return ListTile(
+      title: Text(category.name[0].toUpperCase() + category.name.substring(1)),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SubCategoryListScreen(mainCategory: category),
           ),
-          const SizedBox(height: 24),
-          Text(
-            'Allocation Percentages',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          _buildPercentageSlider(
-            title: 'Needs',
-            value: controller.getPercentage(MainCategoryType.needs),
-            color: Colors.green,
-            onChanged: (val) =>
-                controller.updatePercentages(MainCategoryType.needs, val),
-          ),
-          _buildPercentageSlider(
-            title: 'Wants',
-            value: controller.getPercentage(MainCategoryType.wants),
-            color: Colors.blue,
-            onChanged: (val) =>
-                controller.updatePercentages(MainCategoryType.wants, val),
-          ),
-          _buildPercentageSlider(
-            title: 'Savings',
-            value: controller.getPercentage(MainCategoryType.savings),
-            color: Colors.purple,
-            onChanged: (val) =>
-                controller.updatePercentages(MainCategoryType.savings, val),
-          ),
-          _buildPercentageSlider(
-            title: 'Investments',
-            value: controller.getPercentage(MainCategoryType.investments),
-            color: Colors.orange,
-            onChanged: (val) =>
-                controller.updatePercentages(MainCategoryType.investments, val),
-          ),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 16),
-          Text(
-            'Manage Sub-categories',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          ...MainCategoryType.values.map((category) {
-            return ListTile(
-              title: Text(
-                category.name[0].toUpperCase() + category.name.substring(1),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SubCategoryListScreen(mainCategory: category),
-                  ),
-                );
-              },
-            );
-          }),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () {
-              controller.saveSettings();
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Colors.teal,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Save Settings'),
-          ),
-        ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSaveButton(SettingsController controller) {
+    return Builder(
+      builder: (context) => ElevatedButton(
+        onPressed: () {
+          controller.saveSettings();
+          Navigator.pop(context);
+        },
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
+        ),
+        child: const Text('Save Settings'),
       ),
     );
   }

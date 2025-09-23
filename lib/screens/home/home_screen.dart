@@ -15,86 +15,113 @@ class HomeScreen extends StatelessWidget {
     final controller = Provider.of<HomeController>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Four Jars'),
-        backgroundColor: Colors.blueGrey[900],
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => controller.openSettings(context),
-            tooltip: 'Settings',
-          ),
-        ],
+      appBar: _buildAppBar(context, controller),
+      body: _buildBody(context, controller),
+      floatingActionButton: _buildFloatingActionButton(context, controller),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context, HomeController controller) {
+    return AppBar(
+      title: const Text('My Four Jars'),
+      backgroundColor: Colors.blueGrey[900],
+      foregroundColor: Colors.white,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () => controller.openSettings(context),
+          tooltip: 'Settings',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context, HomeController controller) {
+    return Column(
+      children: [
+        _buildSpendingChart(controller),
+        const Divider(height: 1),
+        _buildCategoriesGrid(context, controller),
+      ],
+    );
+  }
+
+  Widget _buildSpendingChart(HomeController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SpendingChart(
+        categories: controller.categories,
+        colorMap: controller.colorMap,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SpendingChart(
-              categories: controller.categories,
-              colorMap: controller.colorMap,
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 1,
+    );
+  }
+
+  Widget _buildCategoriesGrid(BuildContext context, HomeController controller) {
+    return Expanded(
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16.0),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1,
+        ),
+        itemCount: controller.categories.length,
+        itemBuilder: (context, index) {
+          final category = controller.categories[index];
+          return _buildCategoryGridItem(context, controller, category);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryGridItem(
+    BuildContext context,
+    HomeController controller,
+    Map<String, dynamic> category,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        final categoryTransactions = controller.transactions
+            .where((t) => t.mainCategoryId == category['type'])
+            .toList();
+
+        // 'await' here will pause until the details screen is closed
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (context) => CategoryDetailsController(
+                budgetManager: context.read<BudgetManager>(),
+                existingTransactions: categoryTransactions,
               ),
-              itemCount: controller.categories.length,
-              itemBuilder: (context, index) {
-                final category = controller.categories[index];
-                return GestureDetector(
-                  onTap: () async {
-                    final categoryTransactions = controller.transactions
-                        .where((t) => t.mainCategoryId == category['type'])
-                        .toList();
-
-                    // 'await' here will pause until the details screen is closed
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChangeNotifierProvider(
-                          create: (context) => CategoryDetailsController(
-                            budgetManager: context.read<BudgetManager>(),
-                            existingTransactions: categoryTransactions,
-                          ),
-                          child: CategoryDetailsScreen(
-                            categoryName: category['name'],
-                          ),
-                        ),
-                      ),
-                    );
-
-                    // When we come back, call the new refresh method
-                    controller.refreshData();
-                  },
-                  child: CategoryCard(
-                    name: category['name'],
-                    allocated: category['allocated'],
-                    spent: category['spent'],
-                    color:
-                        controller.colorMap[category['colorName']] ??
-                        Colors.grey,
-                  ),
-                );
-              },
+              child: CategoryDetailsScreen(categoryName: category['name']),
             ),
           ),
-        ],
+        );
+
+        // When we come back, call the new refresh method
+        controller.refreshData();
+      },
+      child: CategoryCard(
+        name: category['name'],
+        allocated: category['allocated'],
+        spent: category['spent'],
+        color: controller.colorMap[category['colorName']] ?? Colors.grey,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => controller.openAddTransactionSheet(context),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-        tooltip: 'Add Transaction',
-        child: const Icon(Icons.add),
-      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton(
+    BuildContext context,
+    HomeController controller,
+  ) {
+    return FloatingActionButton(
+      onPressed: () => controller.openAddTransactionSheet(context),
+      backgroundColor: Colors.teal,
+      foregroundColor: Colors.white,
+      tooltip: 'Add Transaction',
+      child: const Icon(Icons.add),
     );
   }
 }

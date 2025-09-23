@@ -19,101 +19,112 @@ class AddTransactionSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  controller.isEditing
-                      ? 'Edit Transaction'
-                      : 'Add New Transaction',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                _buildTitle(controller),
                 const SizedBox(height: 24),
-
-                TextField(
-                  controller: controller.amountController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    prefixText: '₹ ',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildAmountField(controller),
                 const SizedBox(height: 16),
-
-                TextField(
-                  controller: controller.descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildDescriptionField(controller),
                 const SizedBox(height: 16),
-
-                DropdownButtonFormField<MainCategoryType>(
-                  initialValue: controller.selectedMainCategory,
-                  hint: const Text('Select Category'),
-                  items: MainCategoryType.values.map((category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(
-                        category.name[0].toUpperCase() +
-                            category.name.substring(1),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: controller.isEditing
-                      ? null
-                      : controller.onMainCategoryChanged,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildMainCategoryDropdown(controller),
                 const SizedBox(height: 16),
-
-                DropdownButtonFormField<String>(
-                  initialValue: controller.selectedSubCategoryId,
-                  hint: const Text('Select Sub-category'),
-                  items: controller.availableSubCategories.map((subCategory) {
-                    return DropdownMenuItem(
-                      value: subCategory.id,
-                      child: Text(subCategory.name),
-                    );
-                  }).toList(),
-                  onChanged: controller.availableSubCategories.isEmpty
-                      ? null
-                      : controller.onSubCategoryChanged,
-                  decoration: const InputDecoration(
-                    labelText: 'Sub-category',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                _buildSubCategoryDropdown(controller),
                 const SizedBox(height: 24),
-
-                ElevatedButton(
-                  onPressed: () {
-                    final transaction = controller.submitData();
-                    if (transaction != null) {
-                      // Pop with a result that the calling screen can use
-                      Navigator.pop(context, transaction);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Save Transaction'),
-                ),
+                _buildSaveButton(controller),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTitle(AddTransactionController controller) {
+    return Text(
+      controller.isEditing ? 'Edit Transaction' : 'Add New Transaction',
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildAmountField(AddTransactionController controller) {
+    return TextField(
+      controller: controller.amountController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: const InputDecoration(
+        labelText: 'Amount',
+        prefixText: '₹ ',
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionField(AddTransactionController controller) {
+    return TextField(
+      controller: controller.descriptionController,
+      decoration: const InputDecoration(
+        labelText: 'Description',
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildMainCategoryDropdown(AddTransactionController controller) {
+    return DropdownButtonFormField<MainCategoryType>(
+      initialValue: controller.selectedMainCategory,
+      hint: const Text('Select Category'),
+      items: MainCategoryType.values.map((category) {
+        return DropdownMenuItem(
+          value: category,
+          child: Text(
+            category.name[0].toUpperCase() + category.name.substring(1),
+          ),
+        );
+      }).toList(),
+      onChanged: controller.isEditing ? null : controller.onMainCategoryChanged,
+      decoration: const InputDecoration(
+        labelText: 'Category',
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildSubCategoryDropdown(AddTransactionController controller) {
+    return DropdownButtonFormField<String>(
+      initialValue: controller.selectedSubCategoryId,
+      hint: const Text('Select Sub-category'),
+      items: controller.availableSubCategories.map((subCategory) {
+        return DropdownMenuItem(
+          value: subCategory.id,
+          child: Text(subCategory.name),
+        );
+      }).toList(),
+      onChanged: controller.availableSubCategories.isEmpty
+          ? null
+          : controller.onSubCategoryChanged,
+      decoration: const InputDecoration(
+        labelText: 'Sub-category',
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
+
+  Widget _buildSaveButton(AddTransactionController controller) {
+    return Builder(
+      builder: (context) => ElevatedButton(
+        onPressed: () {
+          final transaction = controller.submitData();
+          if (transaction != null) {
+            // Pop with a result that the calling screen can use
+            Navigator.pop(context, transaction);
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
+        ),
+        child: const Text('Save Transaction'),
+      ),
     );
   }
 }
