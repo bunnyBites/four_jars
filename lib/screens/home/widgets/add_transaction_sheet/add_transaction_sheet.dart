@@ -112,7 +112,7 @@ class AddTransactionSheet extends StatelessWidget {
     return Builder(
       builder: (context) => ElevatedButton(
         onPressed: () {
-          final transaction = controller.submitData();
+          final transaction = controller.submitData(context);
           if (transaction != null) {
             // Pop with a result that the calling screen can use
             Navigator.pop(context, transaction);

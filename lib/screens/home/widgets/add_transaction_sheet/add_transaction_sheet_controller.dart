@@ -54,19 +54,42 @@ class AddTransactionController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Transaction? submitData() {
+  Transaction? submitData(BuildContext context) {
     final enteredAmount = double.tryParse(amountController.text);
+
+    // Perform validation checks
+    if (enteredAmount == null || enteredAmount <= 0) {
+      _showErrorDialog(
+        context,
+        'Invalid Amount',
+        'Please enter a valid amount greater than zero.',
+      );
+      return null;
+    }
+
+    if (selectedMainCategory == null) {
+      _showErrorDialog(
+        context,
+        'No Category Selected',
+        'Please select a main category for this transaction.',
+      );
+      return null;
+    }
+
+    if (selectedSubCategoryId == null) {
+      _showErrorDialog(
+        context,
+        'No Sub-category Selected',
+        'Please select a sub-category.',
+      );
+
+      return null;
+    }
+
+    // If all checks pass, create and return the transaction
     final enteredDescription = descriptionController.text.trim().isEmpty
         ? 'Transaction'
         : descriptionController.text;
-
-    if (enteredAmount == null ||
-        enteredAmount <= 0 ||
-        selectedMainCategory == null ||
-        selectedSubCategoryId == null) {
-      return null; // Return null if validation fails
-    }
-
     return Transaction(
       id: isEditing ? existingTransaction!.id : const Uuid().v4(),
       amount: enteredAmount,
@@ -74,6 +97,24 @@ class AddTransactionController extends ChangeNotifier {
       date: isEditing ? existingTransaction!.date : DateTime.now(),
       mainCategoryId: selectedMainCategory!,
       subCategoryId: selectedSubCategoryId!,
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            child: const Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          ),
+        ],
+      ),
     );
   }
 }
