@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:four_jars/screens/category_details/category_details.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
+import 'package:four_jars/screens/category_details/category_details_screen.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
 import 'package:four_jars/logic/budget_manager.dart';

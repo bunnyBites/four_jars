@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
 
 import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
@@ -15,15 +13,7 @@ class CategoryDetailsController extends ChangeNotifier {
   List<Transaction> get transactions => _transactions;
 
   String getSubCategoryName(String subCategoryId) {
-    final subCategory = _budgetManager.subCategories.firstWhere(
-      (sc) => sc.id == subCategoryId,
-      orElse: () => SubCategory(
-        id: 'unknown',
-        name: 'Unknown',
-        mainCategoryId: MainCategoryType.needs,
-      ),
-    );
-    return subCategory.name;
+    return _budgetManager.getSubCategoryNameById(subCategoryId);
   }
 
   CategoryDetailsController({

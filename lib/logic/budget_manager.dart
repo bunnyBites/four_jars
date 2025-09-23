@@ -105,6 +105,16 @@ class BudgetManager {
     loadData();
   }
 
+  String getSubCategoryNameById(String id) {
+    try {
+      // Find the first sub-category in the list that matches the given ID
+      return subCategories.firstWhere((sc) => sc.id == id).name;
+    } catch (e) {
+      // If for some reason it's not found, return a fallback
+      return 'Unknown';
+    }
+  }
+
   List<SubCategory> getSubCategoriesFor(MainCategoryType mainCategory) {
     return subCategories
         .where((sc) => sc.mainCategoryId == mainCategory)
