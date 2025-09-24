@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context, HomeController controller) {
     return AppBar(
-      title: const Text('My Four Jars'),
+      title: const Text('Four Jars'),
       backgroundColor: Colors.blueGrey[900],
       foregroundColor: Colors.white,
       actions: [
