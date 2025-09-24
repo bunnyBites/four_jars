@@ -86,7 +86,8 @@ class CategoryDetailsScreen extends StatelessWidget {
       background: _buildDismissibleBackground(),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) async {
-        await controller.deleteTransaction(transaction);
+        controller.deleteTransaction(context, transaction);
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

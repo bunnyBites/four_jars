@@ -24,10 +24,40 @@ class CategoryDetailsController extends ChangeNotifier {
     _transactions = existingTransactions;
   }
 
-  Future<void> deleteTransaction(Transaction transaction) async {
-    await _budgetManager.deleteTransaction(transactionId: transaction.id);
-    _transactions.remove(transaction);
-    notifyListeners(); // This tells the UI to rebuild.
+  void deleteTransaction(BuildContext context, Transaction transaction) async {
+    final txIndex = _transactions.indexWhere((tx) => tx.id == transaction.id);
+    final transactionToDelete = _transactions[txIndex];
+
+    _transactions.remove(transactionToDelete);
+    notifyListeners();
+
+    // 3. Show a SnackBar with an Undo action
+    ScaffoldMessenger.of(context).clearSnackBars(); // Remove any old snackbars
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+          SnackBar(
+            content: Text('${transactionToDelete.description} deleted'),
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: 'Undo',
+              onPressed: () {
+                // If undo is pressed, re-insert the item into the list
+                _transactions.insert(txIndex, transactionToDelete);
+                notifyListeners();
+              },
+            ),
+          ),
+        )
+        .closed
+        .then((reason) {
+          // 4. When the SnackBar closes, check if it was because of Undo
+          if (reason != SnackBarClosedReason.action) {
+            // If not, permanently delete from the database
+            _budgetManager.deleteTransaction(
+              transactionId: transactionToDelete.id,
+            );
+          }
+        });
   }
 
   Future<void> editTransaction(
