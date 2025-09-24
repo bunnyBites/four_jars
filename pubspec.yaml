@@ -42,6 +42,7 @@ dependencies:
   uuid: ^4.5.1
   fl_chart: ^1.1.1
   provider: ^6.1.5+1
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.7
   hive_generator: ^2.0.1
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -96,3 +98,21 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/four_jars_icon.png"
+  min_sdk_android: 21 # Your app's minimum Android SDK version
+
+flutter_native_splash:
+  color: "#ffffff" # Background color for light mode
+  image: assets/four_jars_icon.png
+  color_dark: "#121212" # Background color for dark mode
+  image_dark: assets/four_jars_icon.png # You can use a different icon for dark mode if you want
+
+  android_12:
+    color: "#ffffff"
+    image: assets/four_jars_icon.png
+    color_dark: "#121212"
+    image_dark: assets/four_jars_icon.png

@@ -26,12 +26,18 @@ class CategoryDetailsController extends ChangeNotifier {
 
   void deleteTransaction(BuildContext context, Transaction transaction) async {
     final txIndex = _transactions.indexWhere((tx) => tx.id == transaction.id);
+
+    // Check if transaction exists in the list
+    if (txIndex == -1) {
+      return; // Transaction not found, nothing to delete
+    }
+
     final transactionToDelete = _transactions[txIndex];
 
     _transactions.remove(transactionToDelete);
     notifyListeners();
 
-    // 3. Show a SnackBar with an Undo action
+    // Show a SnackBar with an Undo action
     ScaffoldMessenger.of(context).clearSnackBars(); // Remove any old snackbars
     ScaffoldMessenger.of(context)
         .showSnackBar(
@@ -50,7 +56,7 @@ class CategoryDetailsController extends ChangeNotifier {
         )
         .closed
         .then((reason) {
-          // 4. When the SnackBar closes, check if it was because of Undo
+          // When the SnackBar closes, check if it was because of Undo
           if (reason != SnackBarClosedReason.action) {
             // If not, permanently delete from the database
             _budgetManager.deleteTransaction(
