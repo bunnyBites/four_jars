@@ -120,8 +120,6 @@ class AddTransactionSheet extends StatelessWidget {
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
         ),
         child: const Text('Save Transaction'),
       ),

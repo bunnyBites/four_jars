@@ -24,8 +24,6 @@ class HomeScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context, HomeController controller) {
     return AppBar(
       title: const Text('Four Jars'),
-      backgroundColor: Colors.blueGrey[900],
-      foregroundColor: Colors.white,
       actions: [
         IconButton(
           icon: const Icon(Icons.settings),
@@ -118,8 +116,6 @@ class HomeScreen extends StatelessWidget {
   ) {
     return FloatingActionButton(
       onPressed: () => controller.openAddTransactionSheet(context),
-      backgroundColor: Colors.teal,
-      foregroundColor: Colors.white,
       tooltip: 'Add Transaction',
       child: const Icon(Icons.add),
     );
@@ -173,7 +169,7 @@ class CategoryCard extends StatelessWidget {
             ),
             Text(
               'of ₹${allocated.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 8.0),
             LinearProgressIndicator(

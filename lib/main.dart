@@ -5,6 +5,7 @@ import 'package:four_jars/models/sub_category.dart';
 import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/home_screen.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
+import 'package:four_jars/theme/app_theme.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -50,10 +51,9 @@ class FourJarsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Four Jars',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const HomeScreen(),
     );
   }

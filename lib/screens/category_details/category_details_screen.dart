@@ -21,11 +21,7 @@ class CategoryDetailsScreen extends StatelessWidget {
   }
 
   AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(categoryName),
-      backgroundColor: Colors.blueGrey[800],
-      foregroundColor: Colors.white,
-    );
+    return AppBar(title: Text(categoryName));
   }
 
   Widget _buildEmptyState(BuildContext context) {
