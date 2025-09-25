@@ -102,17 +102,17 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/four_jars_icon.png"
+  image_path: "assets/four_jars.png"
   min_sdk_android: 21 # Your app's minimum Android SDK version
 
 flutter_native_splash:
   color: "#ffffff" # Background color for light mode
-  image: assets/four_jars_icon.png
+  image: assets/four_jars_splash_icon.png
   color_dark: "#121212" # Background color for dark mode
-  image_dark: assets/four_jars_icon.png # You can use a different icon for dark mode if you want
+  image_dark: assets/four_jars_splash_icon.png # You can use a different icon for dark mode if you want
 
   android_12:
     color: "#ffffff"
-    image: assets/four_jars_icon.png
+    image: assets/four_jars_splash_icon.png
     color_dark: "#121212"
-    image_dark: assets/four_jars_icon.png
+    image_dark: assets/four_jars_splash_icon.png
