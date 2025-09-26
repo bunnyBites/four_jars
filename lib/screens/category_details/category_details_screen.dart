@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 
 import 'package:provider/provider.dart';
@@ -63,12 +64,14 @@ class CategoryDetailsScreen extends StatelessWidget {
     BuildContext context,
     CategoryDetailsController controller,
   ) {
-    return ListView.builder(
-      itemCount: controller.transactions.length,
-      itemBuilder: (context, index) {
-        final transaction = controller.transactions[index];
-        return _buildTransactionTile(context, controller, transaction);
-      },
+    return AnimationLimiter(
+      child: ListView.builder(
+        itemCount: controller.transactions.length,
+        itemBuilder: (context, index) {
+          final transaction = controller.transactions[index];
+          return _buildTransactionTile(context, controller, transaction, index);
+        },
+      ),
     );
   }
 
@@ -76,42 +79,54 @@ class CategoryDetailsScreen extends StatelessWidget {
     BuildContext context,
     CategoryDetailsController controller,
     dynamic transaction,
+    int index,
   ) {
-    return Dismissible(
-      key: ValueKey(transaction.id),
-      background: _buildDismissibleBackground(),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) async {
-        controller.deleteTransaction(context, transaction);
+    return AnimationConfiguration.staggeredList(
+      position: index,
+      duration: const Duration(milliseconds: 375),
+      child: SlideAnimation(
+        verticalOffset: 50.0,
+        child: FadeInAnimation(
+          child: Dismissible(
+            key: ValueKey(transaction.id),
+            background: _buildDismissibleBackground(),
+            direction: DismissDirection.endToStart,
+            onDismissed: (direction) async {
+              controller.deleteTransaction(context, transaction);
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${transaction.description} deleted'),
-              duration: const Duration(seconds: 2),
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${transaction.description} deleted'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
+            },
+            child: ListTile(
+              title: Text(transaction.description),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sub-category: ${controller.getSubCategoryName(transaction.subCategoryId)}',
+                  ),
+                ],
+              ),
+              trailing: Text(
+                '- ₹${transaction.amount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () => controller.editTransaction(
+                context,
+                transaction,
+              ), // Tap to edit
             ),
-          );
-        }
-      },
-      child: ListTile(
-        title: Text(transaction.description),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sub-category: ${controller.getSubCategoryName(transaction.subCategoryId)}',
-            ),
-          ],
-        ),
-        trailing: Text(
-          '- ₹${transaction.amount.toStringAsFixed(2)}',
-          style: const TextStyle(
-            color: Colors.red,
-            fontWeight: FontWeight.bold,
           ),
         ),
-        onTap: () =>
-            controller.editTransaction(context, transaction), // Tap to edit
       ),
     );
   }
