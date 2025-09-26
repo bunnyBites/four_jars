@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/category_details/category_details_screen.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/screens/home/widgets/spending_chart.dart';
+
 import 'package:four_jars/logic/budget_manager.dart';
 
 import 'package:provider/provider.dart';
@@ -56,19 +58,21 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildCategoriesGrid(BuildContext context, HomeController controller) {
     return Expanded(
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1,
+      child: AnimationLimiter(
+        child: GridView.builder(
+          padding: const EdgeInsets.all(16.0),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1,
+          ),
+          itemCount: controller.categories.length,
+          itemBuilder: (context, index) {
+            final category = controller.categories[index];
+            return _buildCategoryGridItem(context, controller, category, index);
+          },
         ),
-        itemCount: controller.categories.length,
-        itemBuilder: (context, index) {
-          final category = controller.categories[index];
-          return _buildCategoryGridItem(context, controller, category);
-        },
       ),
     );
   }
@@ -77,35 +81,48 @@ class HomeScreen extends StatelessWidget {
     BuildContext context,
     HomeController controller,
     Map<String, dynamic> category,
+    int index,
   ) {
-    return GestureDetector(
-      onTap: () async {
-        final categoryTransactions = controller.transactions
-            .where((t) => t.mainCategoryId == category['type'])
-            .toList();
+    return AnimationConfiguration.staggeredGrid(
+      position: index,
+      columnCount: 2,
+      duration: const Duration(milliseconds: 500),
+      child: SlideAnimation(
+        verticalOffset: 50.0,
+        child: FadeInAnimation(
+          child: GestureDetector(
+            onTap: () async {
+              final categoryTransactions = controller.transactions
+                  .where((t) => t.mainCategoryId == category['type'])
+                  .toList();
 
-        // 'await' here will pause until the details screen is closed
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChangeNotifierProvider(
-              create: (context) => CategoryDetailsController(
-                budgetManager: context.read<BudgetManager>(),
-                existingTransactions: categoryTransactions,
-              ),
-              child: CategoryDetailsScreen(categoryName: category['name']),
+              // 'await' here will pause until the details screen is closed
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChangeNotifierProvider(
+                    create: (context) => CategoryDetailsController(
+                      budgetManager: context.read<BudgetManager>(),
+                      existingTransactions: categoryTransactions,
+                    ),
+                    child: CategoryDetailsScreen(
+                      categoryName: category['name'],
+                    ),
+                  ),
+                ),
+              );
+
+              // When we come back, call the new refresh method
+              controller.refreshData();
+            },
+            child: CategoryCard(
+              name: category['name'],
+              allocated: category['allocated'],
+              spent: category['spent'],
+              color: controller.colorMap[category['colorName']] ?? Colors.grey,
             ),
           ),
-        );
-
-        // When we come back, call the new refresh method
-        controller.refreshData();
-      },
-      child: CategoryCard(
-        name: category['name'],
-        allocated: category['allocated'],
-        spent: category['spent'],
-        color: controller.colorMap[category['colorName']] ?? Colors.grey,
+        ),
       ),
     );
   }
@@ -138,6 +155,7 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The target progress value. Can be from 0.0 to 1.0.
     final double progress = (allocated > 0) ? spent / allocated : 0.0;
 
     return Card(
@@ -169,15 +187,26 @@ class CategoryCard extends StatelessWidget {
             ),
             Text(
               'of ₹${allocated.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
             ),
             const SizedBox(height: 8.0),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 8.0,
-              backgroundColor: color.withValues(alpha: 0.3),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              borderRadius: BorderRadius.circular(4.0),
+
+            TweenAnimationBuilder<double>(
+              // The tween defines the range. We only need to provide the target 'end' value.
+              tween: Tween(end: progress),
+              // Duration of the animation
+              duration: const Duration(milliseconds: 400),
+              // The builder gives us the animated value for each frame
+              builder: (context, animatedValue, child) {
+                return LinearProgressIndicator(
+                  // The value is now the smoothly animated value from the builder
+                  value: animatedValue,
+                  minHeight: 8.0,
+                  backgroundColor: color.withValues(alpha: 0.3),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  borderRadius: BorderRadius.circular(4.0),
+                );
+              },
             ),
           ],
         ),
