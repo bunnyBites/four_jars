@@ -6,6 +6,7 @@ import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/home_screen.dart';
 import 'package:four_jars/screens/home/home_screen_controller.dart';
 import 'package:four_jars/theme/app_theme.dart';
+import 'package:four_jars/theme/theme_controller.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +32,7 @@ void main() async {
       providers: [
         // 1. Provide a single instance of BudgetManager
         Provider<BudgetManager>(create: (context) => BudgetManager()),
+        ChangeNotifierProvider(create: (_) => ThemeController()),
         // 2. Our existing HomeController provider
         ChangeNotifierProvider(
           create: (context) => HomeController(
@@ -49,12 +51,16 @@ class FourJarsApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Four Jars',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const HomeScreen(),
+    return Consumer<ThemeController>(
+      builder: (context, themeController, child) {
+        return MaterialApp(
+          title: 'Four Jars',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeController.themeMode,
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }

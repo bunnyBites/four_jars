@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/models/main_category_type.dart';
 import 'package:four_jars/screens/settings/settings_controller.dart';
 import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_screen.dart';
+import 'package:four_jars/theme/theme_controller.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -34,12 +35,16 @@ class _SettingsScreenState extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, SettingsController controller) {
+    final themeController = Provider.of<ThemeController>(context);
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
         _buildIncomeField(controller),
         const SizedBox(height: 24),
         _buildAllocationSection(context, controller),
+        const SizedBox(height: 24),
+        _buildThemeSwitcher(context, themeController),
         const SizedBox(height: 24),
         const Divider(),
         const SizedBox(height: 16),
@@ -48,6 +53,42 @@ class _SettingsScreenState extends StatelessWidget {
         _buildSaveButton(controller),
       ],
     );
+  }
+
+  Widget _buildThemeSwitcher(
+    BuildContext context,
+    ThemeController themeController,
+  ) {
+    return (Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Appearance', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        SegmentedButton<ThemeMode>(
+          segments: const [
+            ButtonSegment(
+              value: ThemeMode.light,
+              label: Text('Light'),
+              icon: Icon(Icons.wb_sunny),
+            ),
+            ButtonSegment(
+              value: ThemeMode.system,
+              label: Text('System'),
+              icon: Icon(Icons.brightness_auto),
+            ),
+            ButtonSegment(
+              value: ThemeMode.dark,
+              label: Text('Dark'),
+              icon: Icon(Icons.nightlight_round),
+            ),
+          ],
+          selected: {themeController.themeMode},
+          onSelectionChanged: (newSelection) {
+            themeController.setThemeMode(newSelection.first);
+          },
+        ),
+      ],
+    ));
   }
 
   Widget _buildIncomeField(SettingsController controller) {
