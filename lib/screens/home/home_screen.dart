@@ -187,7 +187,7 @@ class CategoryCard extends StatelessWidget {
             ),
             Text(
               'of ₹${allocated.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 8.0),
 
