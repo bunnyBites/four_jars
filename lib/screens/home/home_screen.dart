@@ -28,6 +28,11 @@ class HomeScreen extends StatelessWidget {
       title: const Text('Four Jars'),
       actions: [
         IconButton(
+          icon: const Icon(Icons.bar_chart),
+          onPressed: () => controller.openReportsScreen(context),
+          tooltip: 'Reports',
+        ),
+        IconButton(
           icon: const Icon(Icons.settings),
           onPressed: () => controller.openSettings(context),
           tooltip: 'Settings',
