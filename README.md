@@ -13,7 +13,7 @@ This version represents the completed Minimum Viable Product (MVP) with all esse
 * **Transaction History**: Users can tap on any category to see a detailed, chronological list of their spending.
 * **Clean Architecture**: The project is structured using a **Controller pattern** (`Provider`) that separates the UI from the business logic, making it scalable and easy to maintain.
 
-## Version 0.2: Polish & User Experience
+## Version 0.2: Polish & User Experience(Completed ✅)
 
 This version will focus on refining existing features and improving the overall user experience to make the app feel more professional and intuitive.
 
