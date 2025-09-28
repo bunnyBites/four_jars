@@ -5,6 +5,7 @@ import 'package:four_jars/models/transaction.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
 import 'package:four_jars/screens/report/report_screen.dart';
+import 'package:four_jars/screens/report/report_screen_controller.dart';
 import 'package:four_jars/screens/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -81,7 +82,13 @@ class HomeController extends ChangeNotifier {
   void openReportsScreen(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const ReportsScreen()),
+      MaterialPageRoute(
+        builder: (context) => ChangeNotifierProvider(
+          // Provide the ReportsController, giving it the BudgetManager
+          create: (_) => ReportsController(context.read<BudgetManager>()),
+          child: const ReportsScreen(),
+        ),
+      ),
     );
   }
 }
