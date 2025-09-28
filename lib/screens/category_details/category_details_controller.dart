@@ -9,8 +9,13 @@ import 'package:provider/provider.dart';
 class CategoryDetailsController extends ChangeNotifier {
   final BudgetManager _budgetManager;
 
-  late List<Transaction> _transactions;
-  List<Transaction> get transactions => _transactions;
+  late List<Transaction> _allTransactions;
+  List<Transaction> get transactions => _allTransactions;
+
+  // create a new list that will be displayed in the UI
+  late List<Transaction> filteredTransactions;
+
+  final TextEditingController searchController = TextEditingController();
 
   String getSubCategoryName(String subCategoryId) {
     return _budgetManager.getSubCategoryNameById(subCategoryId);
@@ -21,20 +26,48 @@ class CategoryDetailsController extends ChangeNotifier {
     required List<Transaction> existingTransactions,
   }) : _budgetManager = budgetManager {
     _budgetManager.loadData();
-    _transactions = existingTransactions;
+    _allTransactions = existingTransactions;
+
+    // initially, the filtered list is the same as the full list
+    filteredTransactions = _allTransactions;
+    searchController.addListener(_filterTransactions);
+  }
+
+  void _filterTransactions() {
+    final query = searchController.text.toLowerCase();
+    if (query.isEmpty) {
+      // if the search bar is empty, show all transactions
+      filteredTransactions = _allTransactions;
+    } else {
+      // otherwise, filter the list based on the description
+      filteredTransactions = _allTransactions
+          .where((t) => t.description.toLowerCase().contains(query))
+          .toList();
+    }
+
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    // clean up the controller to avoid memory leaks
+    searchController.dispose();
+    super.dispose();
   }
 
   void deleteTransaction(BuildContext context, Transaction transaction) async {
-    final txIndex = _transactions.indexWhere((tx) => tx.id == transaction.id);
+    final txIndex = _allTransactions.indexWhere(
+      (tx) => tx.id == transaction.id,
+    );
 
     // Check if transaction exists in the list
     if (txIndex == -1) {
       return; // Transaction not found, nothing to delete
     }
 
-    final transactionToDelete = _transactions[txIndex];
+    final transactionToDelete = _allTransactions[txIndex];
 
-    _transactions.remove(transactionToDelete);
+    _allTransactions.remove(transactionToDelete);
     notifyListeners();
 
     // Show a SnackBar with an Undo action
@@ -48,7 +81,7 @@ class CategoryDetailsController extends ChangeNotifier {
               label: 'Undo',
               onPressed: () {
                 // If undo is pressed, re-insert the item into the list
-                _transactions.insert(txIndex, transactionToDelete);
+                _allTransactions.insert(txIndex, transactionToDelete);
                 notifyListeners();
               },
             ),
@@ -86,12 +119,12 @@ class CategoryDetailsController extends ChangeNotifier {
         updatedTransaction: updatedTransaction,
       );
 
-      final index = _transactions.indexWhere(
+      final index = _allTransactions.indexWhere(
         (t) => t.id == updatedTransaction.id,
       );
 
       if (index != -1) {
-        _transactions[index] = updatedTransaction;
+        _allTransactions[index] = updatedTransaction;
         notifyListeners();
       }
     }

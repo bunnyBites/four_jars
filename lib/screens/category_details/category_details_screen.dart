@@ -64,13 +64,39 @@ class CategoryDetailsScreen extends StatelessWidget {
     BuildContext context,
     CategoryDetailsController controller,
   ) {
-    return AnimationLimiter(
-      child: ListView.builder(
-        itemCount: controller.transactions.length,
-        itemBuilder: (context, index) {
-          final transaction = controller.transactions[index];
-          return _buildTransactionTile(context, controller, transaction, index);
-        },
+    return Column(
+      children: [
+        _buildTransactionFilter(controller),
+        Expanded(
+          child: AnimationLimiter(
+            child: ListView.builder(
+              itemCount: controller.filteredTransactions.length,
+              itemBuilder: (context, index) {
+                final transaction = controller.filteredTransactions[index];
+                return _buildTransactionTile(
+                  context,
+                  controller,
+                  transaction,
+                  index,
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransactionFilter(CategoryDetailsController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: TextField(
+        controller: controller.searchController,
+        decoration: InputDecoration(
+          labelText: 'Search by description',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
       ),
     );
   }
@@ -83,7 +109,7 @@ class CategoryDetailsScreen extends StatelessWidget {
   ) {
     return AnimationConfiguration.staggeredList(
       position: index,
-      duration: const Duration(milliseconds: 375),
+      duration: const Duration(milliseconds: 500),
       child: SlideAnimation(
         verticalOffset: 50.0,
         child: FadeInAnimation(
@@ -120,10 +146,7 @@ class CategoryDetailsScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              onTap: () => controller.editTransaction(
-                context,
-                transaction,
-              ), // Tap to edit
+              onTap: () => controller.editTransaction(context, transaction),
             ),
           ),
         ),
