@@ -38,7 +38,7 @@ Please read and adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). Respectful 
 
 ## Branching Strategy
 - **`main`**: The stable branch. All production-ready code is merged here.
-- **`develop`**: The active development branch. Base your feature branches on this.
+- **`dev`**: The active development branch. Base your feature branches on this.
 - **Feature branches**: Use the naming convention `feature/<short-description>`.
 - **Bugfix branches**: Use the naming convention `bugfix/<short-description>`.
 
@@ -78,7 +78,7 @@ Write clear and concise commit messages. Use the following format:
 ---
 
 ## Pull Request Guidelines
-1. Ensure your branch is up-to-date with `develop`.
+1. Ensure your branch is up-to-date with `dev`.
 2. Provide a clear and descriptive title for your pull request.
 3. Include a summary of changes and the problem being solved.
 4. Reference any related issues in the description.
