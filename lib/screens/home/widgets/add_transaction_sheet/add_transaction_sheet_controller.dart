@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
-import 'package:four_jars/models/transaction.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/sub_category/sub_category.dart';
+import 'package:four_jars/models/transaction/transaction.dart';
 import 'package:uuid/uuid.dart';
 
 class AddTransactionController extends ChangeNotifier {

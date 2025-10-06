@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
 import 'package:provider/provider.dart';
 

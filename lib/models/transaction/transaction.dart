@@ -1,5 +1,5 @@
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:hive/hive.dart';
-import 'package:four_jars/models/main_category_type.dart';
 
 part 'transaction.g.dart';
 

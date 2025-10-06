@@ -1,7 +1,7 @@
 import 'package:four_jars/constants/app_data.dart';
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
-import 'package:four_jars/models/transaction.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/sub_category/sub_category.dart';
+import 'package:four_jars/models/transaction/transaction.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 

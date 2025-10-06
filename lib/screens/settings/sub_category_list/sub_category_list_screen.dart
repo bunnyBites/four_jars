@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_controller.dart';
 import 'package:provider/provider.dart';
 
