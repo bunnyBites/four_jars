@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/models/transaction/transaction.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet.dart';
-import 'package:four_jars/screens/home/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
+import 'package:four_jars/screens/main/widgets/add_transaction_sheet/add_transaction_sheet.dart';
+import 'package:four_jars/screens/main/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
 import 'package:four_jars/screens/report/report_screen.dart';
 import 'package:four_jars/screens/report/report_screen_controller.dart';
 import 'package:four_jars/screens/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 
-class HomeController extends ChangeNotifier {
+class MainController extends ChangeNotifier {
   final BudgetManager _budgetManager;
 
   // Expose the manager's data through the controller
@@ -23,7 +23,7 @@ class HomeController extends ChangeNotifier {
     'orange': Colors.orange,
   };
 
-  HomeController(this._budgetManager) {
+  MainController(this._budgetManager) {
     _budgetManager.loadData();
   }
 

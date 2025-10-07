@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
+import 'package:four_jars/models/goal/goal.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/models/transaction/transaction.dart';
-import 'package:four_jars/screens/home/home_screen.dart';
-import 'package:four_jars/screens/home/home_screen_controller.dart';
+import 'package:four_jars/screens/main/main_screen.dart';
+import 'package:four_jars/screens/main/main_screen_controller.dart';
 import 'package:four_jars/theme/app_theme.dart';
 import 'package:four_jars/theme/theme_controller.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -21,11 +22,13 @@ void main() async {
   Hive.registerAdapter(MainCategoryTypeAdapter());
   Hive.registerAdapter(TransactionAdapter());
   Hive.registerAdapter(SubCategoryAdapter());
+  Hive.registerAdapter(GoalAdapter());
 
   // Open all the boxes we need for our data
   await Hive.openBox('budgetBox');
   await Hive.openBox<Transaction>('transactionsBox');
   await Hive.openBox<SubCategory>('subCategoriesBox');
+  await Hive.openBox<Goal>('goalsBox');
 
   runApp(
     MultiProvider(
@@ -33,9 +36,9 @@ void main() async {
         // 1. Provide a single instance of BudgetManager
         Provider<BudgetManager>(create: (context) => BudgetManager()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
-        // 2. Our existing HomeController provider
+        // 2. Our existing MainController provider
         ChangeNotifierProvider(
-          create: (context) => HomeController(
+          create: (context) => MainController(
             // It now reads the BudgetManager from the provider
             context.read<BudgetManager>(),
           ),
@@ -58,7 +61,7 @@ class FourJarsApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeController.themeMode,
-          home: const HomeScreen(),
+          home: const MainScreen(),
         );
       },
     );
