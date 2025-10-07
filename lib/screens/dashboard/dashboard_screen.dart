@@ -42,13 +42,15 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context, MainController controller) {
-    return Column(
-      children: [
-        _buildSpendingChart(controller),
-        const Divider(height: 1),
-        _buildCategoriesGrid(context, controller),
-      ],
-    );
+    return controller.isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
+            children: [
+              _buildSpendingChart(controller),
+              const Divider(height: 1),
+              _buildCategoriesGrid(context, controller),
+            ],
+          );
   }
 
   Widget _buildSpendingChart(MainController controller) {

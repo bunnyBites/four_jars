@@ -11,8 +11,10 @@ import 'package:provider/provider.dart';
 
 class MainController extends ChangeNotifier {
   final BudgetManager _budgetManager;
+  bool _isLoading = true; // Add a loading state
+  bool get isLoading => _isLoading;
 
-  // Expose the manager's data through the controller
+  // expose the manager's data through the controller
   List<Map<String, dynamic>> get categories => _budgetManager.categories;
   List<Transaction> get transactions => _budgetManager.transactions;
 
@@ -24,7 +26,19 @@ class MainController extends ChangeNotifier {
   };
 
   MainController(this._budgetManager) {
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    // process recurring transactions first
+    await _budgetManager.processRecurringTransactions();
+
+    // load all data (which now includes any new transactions)
     _budgetManager.loadData();
+
+    // update the UI
+    _isLoading = false;
+    notifyListeners();
   }
 
   void refreshData() {

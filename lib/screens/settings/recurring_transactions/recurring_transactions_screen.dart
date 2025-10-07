@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/models/recurring_transaction/recurring_transaction.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/add_edit_transaction/add_edit_transaction_screen.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_controller.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class RecurringTransactionsScreen extends StatelessWidget {
@@ -19,10 +20,17 @@ class RecurringTransactionsScreen extends StatelessWidget {
               itemCount: controller.recurringTransactions.length,
               itemBuilder: (context, index) {
                 final tx = controller.recurringTransactions[index];
+                final nextDueDate = controller.calculateNextDueDate(tx);
+
                 return ListTile(
                   title: Text(tx.description),
-                  subtitle: Text('₹${tx.amount} every ${tx.frequency.name}'),
-                  trailing: Text('Next on: TBD'),
+                  subtitle: Text(
+                    '₹${tx.amount.toStringAsFixed(0)} every ${tx.frequency.name}',
+                  ),
+                  // Display the calculated next due date
+                  trailing: Text(
+                    'Next: ${DateFormat.yMd().format(nextDueDate)}',
+                  ),
                 );
               },
             ),

@@ -196,4 +196,76 @@ class BudgetManager {
   Future<void> addRecurringTransaction(RecurringTransaction transaction) async {
     await _recurringTransactionsBox.put(transaction.id, transaction);
   }
+
+  Future<int> processRecurringTransactions() async {
+    final now = DateTime.now();
+    int transactionsCreated = 0;
+
+    // Create a copy of the list to iterate over, as we'll be modifying the original
+    final transactionsToCheck = List<RecurringTransaction>.from(
+      recurringTransactions,
+    );
+
+    for (var recurringTx in transactionsToCheck) {
+      DateTime nextDueDate =
+          recurringTx.lastProcessedDate ?? recurringTx.startDate;
+
+      // This loop will "catch up" on any missed transactions
+      while (nextDueDate.isBefore(now) || nextDueDate.isAtSameMomentAs(now)) {
+        // Create a new standard transaction for this due date
+        final newTransaction = Transaction(
+          id: const Uuid().v4(),
+          amount: recurringTx.amount,
+          description: recurringTx.description,
+          date: nextDueDate, // Use the due date for the transaction date
+          mainCategoryId: recurringTx.mainCategoryId,
+          subCategoryId: recurringTx.subCategoryId,
+        );
+        await _saveTransaction(newTransaction);
+        transactionsCreated++;
+
+        // Update the last processed date on the recurring transaction
+        recurringTx.lastProcessedDate = nextDueDate;
+
+        // Calculate the next due date for the next loop iteration
+        nextDueDate = _calculateNextDueDate(nextDueDate, recurringTx.frequency);
+      }
+
+      // Save the updated recurring transaction with its new lastProcessedDate
+      await _recurringTransactionsBox.put(recurringTx.id, recurringTx);
+    }
+
+    // If we created any new transactions, we must reload all data
+    if (transactionsCreated > 0) {
+      loadData();
+    }
+
+    return transactionsCreated;
+  }
+
+  DateTime _calculateNextDueDate(
+    DateTime currentDate,
+    RecurrenceFrequency frequency,
+  ) {
+    switch (frequency) {
+      case RecurrenceFrequency.daily:
+        return DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day + 1,
+        );
+      case RecurrenceFrequency.weekly:
+        return DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day + 7,
+        );
+      default:
+        return DateTime(
+          currentDate.year,
+          currentDate.month + 1,
+          currentDate.day,
+        );
+    }
+  }
 }
