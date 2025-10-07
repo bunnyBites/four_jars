@@ -51,6 +51,10 @@ class BudgetManager {
     await _goalsBox.put(goal.id, goal);
   }
 
+  Future<void> updateGoal(Goal goal) async {
+    await _goalsBox.put(goal.id, goal);
+  }
+
   void _calculateBudget({
     required double totalIncome,
     required Map<String, int> percentages,

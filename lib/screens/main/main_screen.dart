@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/screens/dashboard/dashboard_screen.dart';
-import 'package:four_jars/screens/goal/goal_controller.dart';
-import 'package:four_jars/screens/goal/goal_screen.dart';
+import 'package:four_jars/screens/goal/goals_controller.dart';
+import 'package:four_jars/screens/goal/goals_screen.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {

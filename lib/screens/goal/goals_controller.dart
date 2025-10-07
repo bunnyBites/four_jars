@@ -8,9 +8,7 @@ class GoalsController extends ChangeNotifier {
 
   List<Goal> get goals => _budgetManager.goals;
 
-  GoalsController(this._budgetManager) {
-    // The BudgetManager passed in is already loaded
-  }
+  GoalsController(this._budgetManager);
 
   Future<void> addGoal({
     required String name,
@@ -25,6 +23,22 @@ class GoalsController extends ChangeNotifier {
     await _budgetManager.addGoal(newGoal);
     // reload the data in the manager and notify listeners
     _budgetManager.loadData();
+    notifyListeners();
+  }
+
+  Future<void> addFundsToGoal({
+    required String goalId,
+    required double amount,
+  }) async {
+    final goal = goals.firstWhere((g) => g.id == goalId);
+    goal.savedAmount += amount;
+
+    // ensure saved amount doesn't exceed the target
+    if (goal.savedAmount > goal.targetAmount) {
+      goal.savedAmount = goal.targetAmount;
+    }
+
+    await _budgetManager.updateGoal(goal);
     notifyListeners();
   }
 }
