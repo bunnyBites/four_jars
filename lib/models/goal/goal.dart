@@ -8,10 +8,10 @@ class Goal {
   final String id;
 
   @HiveField(1)
-  final String name;
+  String name;
 
   @HiveField(2)
-  final double targetAmount;
+  double targetAmount;
 
   @HiveField(3)
   double savedAmount;

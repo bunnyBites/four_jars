@@ -41,4 +41,32 @@ class GoalsController extends ChangeNotifier {
     await _budgetManager.updateGoal(goal);
     notifyListeners();
   }
+
+  Future<void> updateGoal({
+    required Goal goal,
+    required String newName,
+    required double newTargetAmount,
+  }) async {
+    goal.name = newName;
+    goal.targetAmount = newTargetAmount;
+    await _budgetManager.updateGoal(goal);
+    notifyListeners();
+  }
+
+  Future<void> deleteGoal(Goal goal) async {
+    await _budgetManager.deleteGoal(goal.id);
+    // reload data to ensure consistency after deletion
+    _budgetManager.loadData();
+    notifyListeners();
+  }
+
+  void temporaryDeleteGoal(int index) {
+    goals.removeAt(index);
+    notifyListeners();
+  }
+
+  void undoDeleteGoal(int index, Goal goalToDelete) {
+    goals.insert(index, goalToDelete);
+    notifyListeners();
+  }
 }

@@ -7,14 +7,23 @@ import 'package:provider/provider.dart';
 class GoalsScreen extends StatelessWidget {
   const GoalsScreen({super.key});
 
-  void _showAddGoalDialog(BuildContext context, GoalsController controller) {
-    final nameController = TextEditingController();
-    final amountController = TextEditingController();
+  void _showAddEditGoalDialog(
+    BuildContext context,
+    GoalsController controller, {
+    Goal? existingGoal,
+  }) {
+    final bool isEditing = existingGoal != null;
+    final nameController = TextEditingController(
+      text: isEditing ? existingGoal.name : '',
+    );
+    final amountController = TextEditingController(
+      text: isEditing ? existingGoal.targetAmount.toStringAsFixed(0) : '',
+    );
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add New Goal'),
+        title: Text(isEditing ? 'Edit Goal' : 'Add New Goal'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -43,7 +52,15 @@ class GoalsScreen extends StatelessWidget {
               final name = nameController.text;
               final amount = double.tryParse(amountController.text);
               if (name.isNotEmpty && amount != null && amount > 0) {
-                controller.addGoal(name: name, targetAmount: amount);
+                if (isEditing) {
+                  controller.updateGoal(
+                    goal: existingGoal,
+                    newName: name,
+                    newTargetAmount: amount,
+                  );
+                } else {
+                  controller.addGoal(name: name, targetAmount: amount);
+                }
                 Navigator.pop(ctx);
               }
             },
@@ -108,15 +125,60 @@ class GoalsScreen extends StatelessWidget {
                   itemCount: controller.goals.length,
                   itemBuilder: (context, index) {
                     final goal = controller.goals[index];
-                    return GoalCard(
-                      goal: goal,
-                      onAddFunds: () =>
-                          _showAddFundsDialog(context, controller, goal),
+                    return Dismissible(
+                      key: ValueKey(goal.id),
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (direction) {
+                        final goalToDelete = goal;
+                        controller.temporaryDeleteGoal(index);
+
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                              SnackBar(
+                                content: Text('${goalToDelete.name} deleted'),
+                                action: SnackBarAction(
+                                  label: 'Undo',
+                                  onPressed: () {
+                                    controller.undoDeleteGoal(
+                                      index,
+                                      goalToDelete,
+                                    );
+                                  },
+                                ),
+                              ),
+                            )
+                            .closed
+                            .then((reason) {
+                              if (reason != SnackBarClosedReason.action) {
+                                controller.deleteGoal(goalToDelete);
+                              }
+                            });
+                      },
+                      child: GestureDetector(
+                        onTap: () => _showAddEditGoalDialog(
+                          context,
+                          controller,
+                          existingGoal: goal,
+                        ),
+                        child: GoalCard(
+                          goal: goal,
+                          onAddFunds: () {
+                            _showAddFundsDialog(context, controller, goal);
+                          },
+                        ),
+                      ),
                     );
                   },
                 ),
           floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddGoalDialog(context, controller),
+            onPressed: () => _showAddEditGoalDialog(context, controller),
             tooltip: 'Add Goal',
             child: const Icon(Icons.add),
           ),
