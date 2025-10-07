@@ -1,4 +1,5 @@
 import 'package:four_jars/constants/app_data.dart';
+import 'package:four_jars/models/goal/goal.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/models/transaction/transaction.dart';
@@ -9,14 +10,17 @@ class BudgetManager {
   final _budgetBox = Hive.box('budgetBox');
   final _transactionsBox = Hive.box<Transaction>('transactionsBox');
   final _subCategoriesBox = Hive.box<SubCategory>('subCategoriesBox');
+  final _goalsBox = Hive.box<Goal>('goalsBox');
 
   List<Map<String, dynamic>> categories = [];
   List<Transaction> transactions = [];
   List<SubCategory> subCategories = [];
+  List<Goal> goals = [];
 
   void loadData() {
     transactions = _transactionsBox.values.toList();
     subCategories = _subCategoriesBox.values.toList();
+    goals = _goalsBox.values.toList();
 
     // If it's the very first launch, populate sub-categories with defaults
     if (subCategories.isEmpty) {
@@ -41,6 +45,10 @@ class BudgetManager {
 
     // 3. Re-calculate the budget based on the loaded data
     _calculateBudget(totalIncome: totalIncome, percentages: percentages);
+  }
+
+  Future<void> addGoal(Goal goal) async {
+    await _goalsBox.put(goal.id, goal);
   }
 
   void _calculateBudget({
