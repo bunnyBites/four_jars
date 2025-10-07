@@ -136,7 +136,7 @@ class DashboardScreen extends StatelessWidget {
               );
 
               // When we come back, call the new refresh method
-              controller.refreshData();
+              await controller.refreshData();
             },
             child: CategoryCard(
               name: category['name'],

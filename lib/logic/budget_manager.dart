@@ -201,10 +201,8 @@ class BudgetManager {
     final now = DateTime.now();
     int transactionsCreated = 0;
 
-    // Create a copy of the list to iterate over, as we'll be modifying the original
-    final transactionsToCheck = List<RecurringTransaction>.from(
-      recurringTransactions,
-    );
+    // Load recurring transactions directly from database to ensure we have the latest data
+    final transactionsToCheck = _recurringTransactionsBox.values.toList();
 
     for (var recurringTx in transactionsToCheck) {
       DateTime nextDueDate =

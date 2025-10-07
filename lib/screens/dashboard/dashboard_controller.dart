@@ -37,7 +37,9 @@ class DashboardController extends ChangeNotifier {
     _budgetManager.loadData();
   }
 
-  void refreshData() {
+  Future<void> refreshData() async {
+    // Process recurring transactions to catch any new ones
+    await _budgetManager.processRecurringTransactions();
     _budgetManager.loadData();
     notifyListeners();
   }
@@ -85,6 +87,7 @@ class DashboardController extends ChangeNotifier {
       context,
       MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
+    await _budgetManager.processRecurringTransactions();
     _budgetManager.loadData();
     notifyListeners();
   }
