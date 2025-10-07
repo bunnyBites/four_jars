@@ -1,6 +1,7 @@
 import 'package:four_jars/constants/app_data.dart';
 import 'package:four_jars/models/goal/goal.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/recurring_transaction/recurring_transaction.dart';
 import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/models/transaction/transaction.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -11,16 +12,21 @@ class BudgetManager {
   final _transactionsBox = Hive.box<Transaction>('transactionsBox');
   final _subCategoriesBox = Hive.box<SubCategory>('subCategoriesBox');
   final _goalsBox = Hive.box<Goal>('goalsBox');
+  final _recurringTransactionsBox = Hive.box<RecurringTransaction>(
+    'recurringTransactionsBox',
+  );
 
   List<Map<String, dynamic>> categories = [];
   List<Transaction> transactions = [];
   List<SubCategory> subCategories = [];
   List<Goal> goals = [];
+  List<RecurringTransaction> recurringTransactions = [];
 
   void loadData() {
     transactions = _transactionsBox.values.toList();
     subCategories = _subCategoriesBox.values.toList();
     goals = _goalsBox.values.toList();
+    recurringTransactions = _recurringTransactionsBox.values.toList();
 
     // If it's the very first launch, populate sub-categories with defaults
     if (subCategories.isEmpty) {
