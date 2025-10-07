@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_controller.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_screen.dart';
 import 'package:four_jars/screens/settings/settings_controller.dart';
 import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_screen.dart';
@@ -191,7 +193,11 @@ class _SettingsScreenState extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => const RecurringTransactionsScreen(),
+            builder: (_) => ChangeNotifierProvider(
+              create: (ctx) =>
+                  RecurringTransactionsController(ctx.read<BudgetManager>()),
+              child: const RecurringTransactionsScreen(),
+            ),
           ),
         );
       },

@@ -190,4 +190,10 @@ class BudgetManager {
     // After deleting, reload the budget to update the 'spent' totals
     loadData();
   }
+
+  // recurring transactions
+
+  Future<void> addRecurringTransaction(RecurringTransaction transaction) async {
+    await _recurringTransactionsBox.put(transaction.id, transaction);
+  }
 }
