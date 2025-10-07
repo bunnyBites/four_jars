@@ -4,7 +4,7 @@ import 'package:four_jars/screens/category_details/category_details_controller.d
 import 'package:four_jars/screens/category_details/category_details_screen.dart';
 
 import 'package:four_jars/logic/budget_manager.dart';
-import 'package:four_jars/screens/main/main_screen_controller.dart';
+import 'package:four_jars/screens/dashboard/dashboard_controller.dart';
 import 'package:four_jars/screens/main/widgets/spending_chart.dart';
 
 import 'package:provider/provider.dart';
@@ -14,7 +14,7 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<MainController>(context);
+    final controller = Provider.of<DashboardController>(context);
 
     return Scaffold(
       appBar: _buildAppBar(context, controller),
@@ -23,7 +23,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, MainController controller) {
+  AppBar _buildAppBar(BuildContext context, DashboardController controller) {
     return AppBar(
       title: const Text('Four Jars'),
       actions: [
@@ -41,19 +41,32 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, MainController controller) {
-    return controller.isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : Column(
-            children: [
-              _buildSpendingChart(controller),
-              const Divider(height: 1),
-              _buildCategoriesGrid(context, controller),
-            ],
-          );
+  Widget _buildBody(BuildContext context, DashboardController controller) {
+    return FutureBuilder(
+      future: controller.initFuture,
+      builder: (context, snapshot) {
+        // while the future is running, show a loading spinner
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // if there was an error, show an error message
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error initializing app.'));
+        }
+
+        return Column(
+          children: [
+            _buildSpendingChart(controller),
+            const Divider(height: 1),
+            _buildCategoriesGrid(context, controller),
+          ],
+        );
+      },
+    );
   }
 
-  Widget _buildSpendingChart(MainController controller) {
+  Widget _buildSpendingChart(DashboardController controller) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SpendingChart(
@@ -63,7 +76,10 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoriesGrid(BuildContext context, MainController controller) {
+  Widget _buildCategoriesGrid(
+    BuildContext context,
+    DashboardController controller,
+  ) {
     return Expanded(
       child: AnimationLimiter(
         child: GridView.builder(
@@ -86,7 +102,7 @@ class DashboardScreen extends StatelessWidget {
 
   Widget _buildCategoryGridItem(
     BuildContext context,
-    MainController controller,
+    DashboardController controller,
     Map<String, dynamic> category,
     int index,
   ) {
@@ -136,7 +152,7 @@ class DashboardScreen extends StatelessWidget {
 
   Widget _buildFloatingActionButton(
     BuildContext context,
-    MainController controller,
+    DashboardController controller,
   ) {
     return FloatingActionButton(
       onPressed: () => controller.openAddTransactionSheet(context),

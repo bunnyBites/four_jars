@@ -5,8 +5,8 @@ import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/models/recurring_transaction/recurring_transaction.dart';
 import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/models/transaction/transaction.dart';
+import 'package:four_jars/screens/dashboard/dashboard_controller.dart';
 import 'package:four_jars/screens/main/main_screen.dart';
-import 'package:four_jars/screens/main/main_screen_controller.dart';
 import 'package:four_jars/theme/app_theme.dart';
 import 'package:four_jars/theme/theme_controller.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -40,9 +40,9 @@ void main() async {
         // 1. Provide a single instance of BudgetManager
         Provider<BudgetManager>(create: (context) => BudgetManager()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
-        // 2. Our existing MainController provider
+        // 2. Our existing DashboardController provider
         ChangeNotifierProvider(
-          create: (context) => MainController(
+          create: (context) => DashboardController(
             // It now reads the BudgetManager from the provider
             context.read<BudgetManager>(),
           ),

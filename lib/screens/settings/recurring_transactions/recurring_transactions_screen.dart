@@ -27,7 +27,7 @@ class RecurringTransactionsScreen extends StatelessWidget {
                   subtitle: Text(
                     '₹${tx.amount.toStringAsFixed(0)} every ${tx.frequency.name}',
                   ),
-                  // Display the calculated next due date
+                  // display the calculated next due date
                   trailing: Text(
                     'Next: ${DateFormat.yMd().format(nextDueDate)}',
                   ),
