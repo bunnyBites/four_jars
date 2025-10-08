@@ -1,7 +1,9 @@
 import 'package:four_jars/constants/app_data.dart';
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
-import 'package:four_jars/models/transaction.dart';
+import 'package:four_jars/models/goal/goal.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/recurring_transaction/recurring_transaction.dart';
+import 'package:four_jars/models/sub_category/sub_category.dart';
+import 'package:four_jars/models/transaction/transaction.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -9,14 +11,22 @@ class BudgetManager {
   final _budgetBox = Hive.box('budgetBox');
   final _transactionsBox = Hive.box<Transaction>('transactionsBox');
   final _subCategoriesBox = Hive.box<SubCategory>('subCategoriesBox');
+  final _goalsBox = Hive.box<Goal>('goalsBox');
+  final _recurringTransactionsBox = Hive.box<RecurringTransaction>(
+    'recurringTransactionsBox',
+  );
 
   List<Map<String, dynamic>> categories = [];
   List<Transaction> transactions = [];
   List<SubCategory> subCategories = [];
+  List<Goal> goals = [];
+  List<RecurringTransaction> recurringTransactions = [];
 
   void loadData() {
     transactions = _transactionsBox.values.toList();
     subCategories = _subCategoriesBox.values.toList();
+    goals = _goalsBox.values.toList();
+    recurringTransactions = _recurringTransactionsBox.values.toList();
 
     // If it's the very first launch, populate sub-categories with defaults
     if (subCategories.isEmpty) {
@@ -41,6 +51,18 @@ class BudgetManager {
 
     // 3. Re-calculate the budget based on the loaded data
     _calculateBudget(totalIncome: totalIncome, percentages: percentages);
+  }
+
+  Future<void> addGoal(Goal goal) async {
+    await _goalsBox.put(goal.id, goal);
+  }
+
+  Future<void> updateGoal(Goal goal) async {
+    await _goalsBox.put(goal.id, goal);
+  }
+
+  Future<void> deleteGoal(String goalId) async {
+    await _goalsBox.delete(goalId);
   }
 
   void _calculateBudget({
@@ -167,5 +189,81 @@ class BudgetManager {
     await _transactionsBox.delete(transactionId);
     // After deleting, reload the budget to update the 'spent' totals
     loadData();
+  }
+
+  // recurring transactions
+
+  Future<void> addRecurringTransaction(RecurringTransaction transaction) async {
+    await _recurringTransactionsBox.put(transaction.id, transaction);
+  }
+
+  Future<int> processRecurringTransactions() async {
+    final now = DateTime.now();
+    int transactionsCreated = 0;
+
+    // Load recurring transactions directly from database to ensure we have the latest data
+    final transactionsToCheck = _recurringTransactionsBox.values.toList();
+
+    for (var recurringTx in transactionsToCheck) {
+      DateTime nextDueDate =
+          recurringTx.lastProcessedDate ?? recurringTx.startDate;
+
+      // This loop will "catch up" on any missed transactions
+      while (nextDueDate.isBefore(now) || nextDueDate.isAtSameMomentAs(now)) {
+        // Create a new standard transaction for this due date
+        final newTransaction = Transaction(
+          id: const Uuid().v4(),
+          amount: recurringTx.amount,
+          description: recurringTx.description,
+          date: nextDueDate, // Use the due date for the transaction date
+          mainCategoryId: recurringTx.mainCategoryId,
+          subCategoryId: recurringTx.subCategoryId,
+        );
+        await _saveTransaction(newTransaction);
+        transactionsCreated++;
+
+        // Update the last processed date on the recurring transaction
+        recurringTx.lastProcessedDate = nextDueDate;
+
+        // Calculate the next due date for the next loop iteration
+        nextDueDate = _calculateNextDueDate(nextDueDate, recurringTx.frequency);
+      }
+
+      // Save the updated recurring transaction with its new lastProcessedDate
+      await _recurringTransactionsBox.put(recurringTx.id, recurringTx);
+    }
+
+    // If we created any new transactions, we must reload all data
+    if (transactionsCreated > 0) {
+      loadData();
+    }
+
+    return transactionsCreated;
+  }
+
+  DateTime _calculateNextDueDate(
+    DateTime currentDate,
+    RecurrenceFrequency frequency,
+  ) {
+    switch (frequency) {
+      case RecurrenceFrequency.daily:
+        return DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day + 1,
+        );
+      case RecurrenceFrequency.weekly:
+        return DateTime(
+          currentDate.year,
+          currentDate.month,
+          currentDate.day + 7,
+        );
+      default:
+        return DateTime(
+          currentDate.year,
+          currentDate.month + 1,
+          currentDate.day,
+        );
+    }
   }
 }

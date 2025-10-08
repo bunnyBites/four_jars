@@ -1,7 +1,7 @@
-import 'package:four_jars/models/main_category_type.dart';
-import 'package:four_jars/models/sub_category.dart';
-
 // Our starting budget data
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/models/sub_category/sub_category.dart';
+
 final List<Map<String, dynamic>> initialCategoriesData = [
   {
     'name': 'Needs',

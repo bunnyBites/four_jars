@@ -8,7 +8,7 @@ part of 'main_category_type.dart';
 
 class MainCategoryTypeAdapter extends TypeAdapter<MainCategoryType> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
   MainCategoryType read(BinaryReader reader) {

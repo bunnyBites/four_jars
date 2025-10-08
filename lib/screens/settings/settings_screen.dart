@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:four_jars/models/main_category_type.dart';
+import 'package:four_jars/logic/budget_manager.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_controller.dart';
+import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_screen.dart';
 import 'package:four_jars/screens/settings/settings_controller.dart';
 import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_screen.dart';
 import 'package:four_jars/theme/theme_controller.dart';
@@ -48,6 +51,8 @@ class _SettingsScreenState extends StatelessWidget {
         const Divider(),
         const SizedBox(height: 16),
         _buildSubCategoriesSection(context),
+        const Divider(),
+        _buildRecurringTransactions(context),
         const SizedBox(height: 32),
         _buildSaveButton(controller),
       ],
@@ -173,6 +178,26 @@ class _SettingsScreenState extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (_) => SubCategoryListScreen(mainCategory: category),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildRecurringTransactions(BuildContext context) {
+    return ListTile(
+      title: const Text('Recurring Transactions'),
+      subtitle: const Text('Manage automatic monthly bills & subscriptions'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChangeNotifierProvider(
+              create: (ctx) =>
+                  RecurringTransactionsController(ctx.read<BudgetManager>()),
+              child: const RecurringTransactionsScreen(),
+            ),
           ),
         );
       },

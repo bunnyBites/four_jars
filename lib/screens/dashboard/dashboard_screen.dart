@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/category_details/category_details_screen.dart';
-import 'package:four_jars/screens/home/home_screen_controller.dart';
-import 'package:four_jars/screens/home/widgets/spending_chart.dart';
 
 import 'package:four_jars/logic/budget_manager.dart';
+import 'package:four_jars/screens/dashboard/dashboard_controller.dart';
+import 'package:four_jars/screens/main/widgets/spending_chart.dart';
 
 import 'package:provider/provider.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<HomeController>(context);
+    final controller = Provider.of<DashboardController>(context);
 
     return Scaffold(
       appBar: _buildAppBar(context, controller),
@@ -23,9 +23,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, HomeController controller) {
+  AppBar _buildAppBar(BuildContext context, DashboardController controller) {
     return AppBar(
-      title: const Text('Four Jars'),
       actions: [
         IconButton(
           icon: const Icon(Icons.bar_chart),
@@ -41,17 +40,32 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, HomeController controller) {
-    return Column(
-      children: [
-        _buildSpendingChart(controller),
-        const Divider(height: 1),
-        _buildCategoriesGrid(context, controller),
-      ],
+  Widget _buildBody(BuildContext context, DashboardController controller) {
+    return FutureBuilder(
+      future: controller.initFuture,
+      builder: (context, snapshot) {
+        // while the future is running, show a loading spinner
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        // if there was an error, show an error message
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error initializing app.'));
+        }
+
+        return Column(
+          children: [
+            _buildSpendingChart(controller),
+            const Divider(height: 1),
+            _buildCategoriesGrid(context, controller),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildSpendingChart(HomeController controller) {
+  Widget _buildSpendingChart(DashboardController controller) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SpendingChart(
@@ -61,7 +75,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoriesGrid(BuildContext context, HomeController controller) {
+  Widget _buildCategoriesGrid(
+    BuildContext context,
+    DashboardController controller,
+  ) {
     return Expanded(
       child: AnimationLimiter(
         child: GridView.builder(
@@ -84,7 +101,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildCategoryGridItem(
     BuildContext context,
-    HomeController controller,
+    DashboardController controller,
     Map<String, dynamic> category,
     int index,
   ) {
@@ -118,7 +135,7 @@ class HomeScreen extends StatelessWidget {
               );
 
               // When we come back, call the new refresh method
-              controller.refreshData();
+              await controller.refreshData();
             },
             child: CategoryCard(
               name: category['name'],
@@ -134,7 +151,7 @@ class HomeScreen extends StatelessWidget {
 
   Widget _buildFloatingActionButton(
     BuildContext context,
-    HomeController controller,
+    DashboardController controller,
   ) {
     return FloatingActionButton(
       onPressed: () => controller.openAddTransactionSheet(context),
