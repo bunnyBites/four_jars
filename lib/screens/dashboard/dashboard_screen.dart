@@ -25,7 +25,6 @@ class DashboardScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context, DashboardController controller) {
     return AppBar(
-      title: const Text('Four Jars'),
       actions: [
         IconButton(
           icon: const Icon(Icons.bar_chart),
