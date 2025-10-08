@@ -113,7 +113,7 @@ flutter_native_splash:
   image: assets/four_jars_splash_icon.png
   color_dark: "#121212" # Background color for dark mode
   image_dark: assets/four_jars_splash_icon.png # You can use a different icon for dark mode if you want
-  ios: true
+
   android_12:
     color: "#ffffff"
     image: assets/four_jars_splash_icon.png
