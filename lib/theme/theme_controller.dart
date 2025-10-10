@@ -13,10 +13,10 @@ class ThemeController extends ChangeNotifier {
   }
 
   void loadThemeMode() {
-    // Read the saved theme index from Hive, defaulting to 0 (system)
+    // read the saved theme index from Hive, defaulting to 0 (system)
     final savedThemeIndex = _box.get(_themeKey, defaultValue: 0);
 
-    // Convert the index back to a ThemeMode enum
+    // convert the index back to a ThemeMode enum
     _themeMode = ThemeMode.values[savedThemeIndex];
     notifyListeners();
   }
@@ -24,7 +24,8 @@ class ThemeController extends ChangeNotifier {
   void setThemeMode(ThemeMode mode) {
     if (mode == _themeMode) return;
     _themeMode = mode;
-    // Save the new theme's index to Hive
+
+    // save the new theme's index to Hive
     _box.put(_themeKey, mode.index);
     notifyListeners();
   }

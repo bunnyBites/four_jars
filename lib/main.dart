@@ -16,7 +16,7 @@ void main() async {
   // ensure Flutter is ready before we do anything else
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive for Flutter
+  // initialize Hive for Flutter
   await Hive.initFlutter();
 
   // register our model adapters
@@ -37,15 +37,11 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // 1. Provide a single instance of BudgetManager
         Provider<BudgetManager>(create: (context) => BudgetManager()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
-        // 2. Our existing DashboardController provider
         ChangeNotifierProvider(
-          create: (context) => DashboardController(
-            // It now reads the BudgetManager from the provider
-            context.read<BudgetManager>(),
-          ),
+          create: (context) =>
+              DashboardController(context.read<BudgetManager>()),
         ),
       ],
       child: const FourJarsApp(),

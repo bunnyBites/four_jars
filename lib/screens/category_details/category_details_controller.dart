@@ -60,9 +60,9 @@ class CategoryDetailsController extends ChangeNotifier {
       (tx) => tx.id == transaction.id,
     );
 
-    // Check if transaction exists in the list
+    // check if transaction exists in the list
     if (txIndex == -1) {
-      return; // Transaction not found, nothing to delete
+      return; // transaction not found, nothing to delete
     }
 
     final transactionToDelete = _allTransactions[txIndex];
@@ -70,7 +70,7 @@ class CategoryDetailsController extends ChangeNotifier {
     _allTransactions.remove(transactionToDelete);
     notifyListeners();
 
-    // Show a SnackBar with an Undo action
+    // show a SnackBar with an Undo action
     ScaffoldMessenger.of(context).clearSnackBars(); // Remove any old snackbars
     ScaffoldMessenger.of(context)
         .showSnackBar(
@@ -107,7 +107,7 @@ class CategoryDetailsController extends ChangeNotifier {
       context: context,
       isScrollControlled: true,
       builder: (_) => ChangeNotifierProvider(
-        // Provide controller with existing data for edit mode
+        // provide controller with existing data for edit mode
         create: (_) =>
             AddTransactionController(existingTransaction: transaction),
         child: const AddTransactionSheet(),

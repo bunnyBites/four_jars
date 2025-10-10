@@ -38,7 +38,6 @@ class DashboardController extends ChangeNotifier {
   }
 
   Future<void> refreshData() async {
-    // Process recurring transactions to catch any new ones
     await _budgetManager.processRecurringTransactions();
     _budgetManager.loadData();
     notifyListeners();
@@ -97,7 +96,6 @@ class DashboardController extends ChangeNotifier {
       context,
       MaterialPageRoute(
         builder: (context) => ChangeNotifierProvider(
-          // Provide the ReportsController, giving it the BudgetManager
           create: (_) => ReportsController(context.read<BudgetManager>()),
           child: const ReportsScreen(),
         ),

@@ -219,7 +219,7 @@ class _SettingsScreenState extends StatelessWidget {
     );
   }
 
-  // Helper widget for slider
+  // helper widget for slider
   Widget _buildPercentageSlider({
     required String title,
     required double value,
