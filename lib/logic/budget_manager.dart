@@ -28,7 +28,7 @@ class BudgetManager {
     goals = _goalsBox.values.toList();
     recurringTransactions = _recurringTransactionsBox.values.toList();
 
-    // If it's the very first launch, populate sub-categories with defaults
+    // if it's the very first launch, populate sub-categories with defaults
     if (subCategories.isEmpty) {
       final existingIds = _subCategoriesBox.values.map((sc) => sc.id).toSet();
       subCategories = initialSubCategories
@@ -49,7 +49,7 @@ class BudgetManager {
       'investments': _budgetBox.get('investmentsPercentage', defaultValue: 10),
     };
 
-    // 3. Re-calculate the budget based on the loaded data
+    // re-calculate the budget based on the loaded data
     _calculateBudget(totalIncome: totalIncome, percentages: percentages);
   }
 
@@ -129,10 +129,10 @@ class BudgetManager {
 
   String getSubCategoryNameById(String id) {
     try {
-      // Find the first sub-category in the list that matches the given ID
+      // find the first sub-category in the list that matches the given ID
       return subCategories.firstWhere((sc) => sc.id == id).name;
     } catch (e) {
-      // If for some reason it's not found, return a fallback
+      // if for some reason it's not found, return a fallback
       return 'Unknown';
     }
   }
@@ -167,7 +167,7 @@ class BudgetManager {
       mainCategoryId: mainCategoryId,
     );
     await _subCategoriesBox.put(id, updatedSubCategory);
-    // After any change, always reload the budget to recalculate totals
+    // after any change, always reload the budget to recalculate totals
     loadData();
   }
 
@@ -179,15 +179,15 @@ class BudgetManager {
   Future<void> updateTransaction({
     required Transaction updatedTransaction,
   }) async {
-    // Hive automatically overwrites the entry with the same key (the ID)
+    // hive automatically overwrites the entry with the same key (the ID)
     await _transactionsBox.put(updatedTransaction.id, updatedTransaction);
-    // After any change, always reload the budget to recalculate totals
+    // after any change, always reload the budget to recalculate totals
     loadData();
   }
 
   Future<void> deleteTransaction({required String transactionId}) async {
     await _transactionsBox.delete(transactionId);
-    // After deleting, reload the budget to update the 'spent' totals
+    // after deleting, reload the budget to update the 'spent' totals
     loadData();
   }
 
@@ -201,39 +201,39 @@ class BudgetManager {
     final now = DateTime.now();
     int transactionsCreated = 0;
 
-    // Load recurring transactions directly from database to ensure we have the latest data
+    // load recurring transactions directly from database to ensure we have the latest data
     final transactionsToCheck = _recurringTransactionsBox.values.toList();
 
     for (var recurringTx in transactionsToCheck) {
       DateTime nextDueDate =
           recurringTx.lastProcessedDate ?? recurringTx.startDate;
 
-      // This loop will "catch up" on any missed transactions
+      // this loop will "catch up" on any missed transactions
       while (nextDueDate.isBefore(now) || nextDueDate.isAtSameMomentAs(now)) {
-        // Create a new standard transaction for this due date
+        // create a new standard transaction for this due date
         final newTransaction = Transaction(
           id: const Uuid().v4(),
           amount: recurringTx.amount,
           description: recurringTx.description,
-          date: nextDueDate, // Use the due date for the transaction date
+          date: nextDueDate, // use the due date for the transaction date
           mainCategoryId: recurringTx.mainCategoryId,
           subCategoryId: recurringTx.subCategoryId,
         );
         await _saveTransaction(newTransaction);
         transactionsCreated++;
 
-        // Update the last processed date on the recurring transaction
+        // update the last processed date on the recurring transaction
         recurringTx.lastProcessedDate = nextDueDate;
 
-        // Calculate the next due date for the next loop iteration
+        // calculate the next due date for the next loop iteration
         nextDueDate = _calculateNextDueDate(nextDueDate, recurringTx.frequency);
       }
 
-      // Save the updated recurring transaction with its new lastProcessedDate
+      // save the updated recurring transaction with its new lastProcessedDate
       await _recurringTransactionsBox.put(recurringTx.id, recurringTx);
     }
 
-    // If we created any new transactions, we must reload all data
+    // if we created any new transactions, we must reload all data
     if (transactionsCreated > 0) {
       loadData();
     }

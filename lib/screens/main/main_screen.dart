@@ -1,4 +1,3 @@
-// lib/screens/home/main_screen.dart
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/screens/dashboard/dashboard_screen.dart';

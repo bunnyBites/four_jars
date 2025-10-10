@@ -7,7 +7,7 @@ class SettingsController extends ChangeNotifier {
   final _incomeController = TextEditingController();
   final BudgetManager _budgetManager = BudgetManager();
 
-  // State variables for our sliders
+  // state variables for our sliders
   late double _needsPerc;
   late double _wantsPerc;
   late double _savingsPerc;
@@ -15,7 +15,6 @@ class SettingsController extends ChangeNotifier {
 
   TextEditingController get incomeController => _incomeController;
 
-  // Generic getter for percentage fields
   double getPercentage(MainCategoryType categoryType) {
     switch (categoryType) {
       case MainCategoryType.needs:
@@ -49,16 +48,16 @@ class SettingsController extends ChangeNotifier {
         .toDouble();
   }
 
-  // Logic to adjust sliders while keeping the total at 100%
+  // logic to adjust sliders while keeping the total at 100%
   void updatePercentages(MainCategoryType changedCategory, double value) {
     double total = 100.0;
-    // Temporarily store current values
+    // temporarily store current values
     double needs = _needsPerc;
     double wants = _wantsPerc;
     double savings = _savingsPerc;
     double investments = _investmentsPerc;
 
-    // Update the slider that was changed
+    // update the slider that was changed
     switch (changedCategory) {
       case MainCategoryType.needs:
         needs = value;
@@ -96,13 +95,13 @@ class SettingsController extends ChangeNotifier {
       }
     }
 
-    // Assign the final, rounded values
+    // assign the final, rounded values
     _needsPerc = needs.roundToDouble();
     _wantsPerc = wants.roundToDouble();
     _savingsPerc = savings.roundToDouble();
     _investmentsPerc = investments.roundToDouble();
 
-    // Final check to ensure it sums to 100 due to rounding
+    // final check to ensure it sums to 100 due to rounding
     double finalTotal =
         _needsPerc + _wantsPerc + _savingsPerc + _investmentsPerc;
     if (finalTotal != 100) {
