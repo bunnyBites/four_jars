@@ -105,7 +105,6 @@ flutter_launcher_icons:
   ios: false
   image_path: "assets/four_jars.png"
   min_sdk_android: 21 # Your app's minimum Android SDK version
-  adaptive_icon_background: "#2196F3"
   adaptive_icon_foreground: "assets/four_jars.png"
 
 flutter_native_splash:
