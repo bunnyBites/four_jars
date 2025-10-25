@@ -57,6 +57,7 @@ class FourJarsApp extends StatelessWidget {
     return Consumer<ThemeController>(
       builder: (context, themeController, child) {
         return MaterialApp(
+          title: 'Four Jars',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeController.themeMode,

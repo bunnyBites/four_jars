@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // --- Light Theme ---
+  static const Color _seedColor = Color(0xFFC1E1C1);
+  static const Color _darkSeedColor = Color(0xFF53AC53);
+
+  // light mode
   static final ThemeData lightTheme =
       ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.teal,
+          primary: _darkSeedColor,
+          seedColor: _seedColor,
           brightness: Brightness.light,
         ),
         useMaterial3: true,
       ).copyWith(
-        // Customize specific widget themes
+        // customize specific widget themes
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF004D40), // A darker teal for the app bar
-          foregroundColor: Colors.white,
+          backgroundColor: _seedColor,
+          foregroundColor: Colors.black,
         ),
         cardTheme: CardThemeData(
           elevation: 4.0,
@@ -24,8 +28,8 @@ class AppTheme {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.teal[700],
-            foregroundColor: Colors.white,
+            backgroundColor: _seedColor,
+            foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -33,7 +37,7 @@ class AppTheme {
         ),
       );
 
-  // --- Dark Theme ---
+  // dark mode
   static final ThemeData darkTheme =
       ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
