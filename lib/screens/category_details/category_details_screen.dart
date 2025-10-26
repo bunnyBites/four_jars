@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
-
+import 'package:four_jars/theme/app_theme.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class CategoryDetailsScreen extends StatelessWidget {
@@ -30,30 +30,17 @@ class CategoryDetailsScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'No Transactions Yet',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
-            ),
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 64,
+            color: AppTheme.textSecondary.withOpacity(0.5),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceM),
           Text(
-            'All transactions for this category will appear here',
-            style: TextStyle(fontSize: 16, color: Colors.grey[500]),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back),
-            label: const Text('Go Back'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
+            'No transactions yet',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -66,87 +53,165 @@ class CategoryDetailsScreen extends StatelessWidget {
   ) {
     return Column(
       children: [
-        _buildTransactionFilter(controller),
+        _buildSearchBar(controller),
         Expanded(
-          child: AnimationLimiter(
-            child: ListView.builder(
-              itemCount: controller.filteredTransactions.length,
-              itemBuilder: (context, index) {
-                final transaction = controller.filteredTransactions[index];
-                return _buildTransactionTile(
-                  context,
-                  controller,
-                  transaction,
-                  index,
-                );
-              },
-            ),
-          ),
+          child: controller.filteredTransactions.isEmpty
+              ? _buildNoResultsState(context)
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spaceM,
+                    vertical: AppTheme.spaceS,
+                  ),
+                  itemCount: controller.filteredTransactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = controller.filteredTransactions[index];
+                    return _buildTransactionCard(
+                      context,
+                      controller,
+                      transaction,
+                    );
+                  },
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildTransactionFilter(CategoryDetailsController controller) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
+  Widget _buildSearchBar(CategoryDetailsController controller) {
+    return Container(
+      margin: const EdgeInsets.all(AppTheme.spaceM),
+      decoration: BoxDecoration(
+        color: AppTheme.cardBackground,
+        borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: TextField(
         controller: controller.searchController,
         decoration: InputDecoration(
-          labelText: 'Search by description',
-          prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          hintText: 'Search transactions...',
+          prefixIcon: Icon(Icons.search, color: AppTheme.textSecondary),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.all(AppTheme.spaceM),
         ),
       ),
     );
   }
 
-  Widget _buildTransactionTile(
+  Widget _buildNoResultsState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search_off,
+            size: 64,
+            color: AppTheme.textSecondary.withOpacity(0.5),
+          ),
+          const SizedBox(height: AppTheme.spaceM),
+          Text(
+            'No matching transactions',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppTheme.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionCard(
     BuildContext context,
     CategoryDetailsController controller,
     dynamic transaction,
-    int index,
   ) {
-    return AnimationConfiguration.staggeredList(
-      position: index,
-      duration: const Duration(milliseconds: 500),
-      child: SlideAnimation(
-        verticalOffset: 50.0,
-        child: FadeInAnimation(
-          child: Dismissible(
-            key: ValueKey(transaction.id),
-            background: _buildDismissibleBackground(),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) async {
-              controller.deleteTransaction(context, transaction);
+    final dateFormat = DateFormat('MMM dd, yyyy');
+    final transactionDate = transaction.date ?? DateTime.now();
 
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${transaction.description} deleted'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            child: ListTile(
-              title: Text(transaction.description),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sub-category: ${controller.getSubCategoryName(transaction.subCategoryId)}',
-                  ),
-                ],
+    return Dismissible(
+      key: ValueKey(transaction.id),
+      background: _buildDismissibleBackground(),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) async {
+        controller.deleteTransaction(context, transaction);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${transaction.description} deleted'),
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
               ),
-              trailing: Text(
-                '- ₹${transaction.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+            ),
+          );
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+        child: InkWell(
+          onTap: () => controller.editTransaction(context, transaction),
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spaceM),
+            child: Row(
+              children: [
+                // Left side - Description and sub-category
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.description,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        controller.getSubCategoryName(
+                          transaction.subCategoryId,
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              onTap: () => controller.editTransaction(context, transaction),
+                const SizedBox(width: AppTheme.spaceM),
+                // Right side - Amount, date, and chevron
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '₹${transaction.amount.toStringAsFixed(0)}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          dateFormat.format(transactionDate),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
@@ -156,10 +221,14 @@ class CategoryDetailsScreen extends StatelessWidget {
 
   Widget _buildDismissibleBackground() {
     return Container(
-      color: Colors.red,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 20),
-      child: const Icon(Icons.delete, color: Colors.white),
+      padding: const EdgeInsets.only(right: AppTheme.spaceL),
+      child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
     );
   }
 }

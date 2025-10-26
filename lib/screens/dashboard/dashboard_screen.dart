@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/category_details/category_details_screen.dart';
-
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/screens/dashboard/dashboard_controller.dart';
 import 'package:four_jars/screens/main/widgets/spending_chart.dart';
-
+import 'package:four_jars/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -25,15 +23,15 @@ class DashboardScreen extends StatelessWidget {
 
   AppBar _buildAppBar(BuildContext context, DashboardController controller) {
     return AppBar(
-      title: const Text('Four Jars'),
+      title: const Text('Dashboard'),
       actions: [
         IconButton(
-          icon: const Icon(Icons.bar_chart),
+          icon: const Icon(Icons.bar_chart_outlined),
           onPressed: () => controller.openReportsScreen(context),
           tooltip: 'Reports',
         ),
         IconButton(
-          icon: const Icon(Icons.settings),
+          icon: const Icon(Icons.settings_outlined),
           onPressed: () => controller.openSettings(context),
           tooltip: 'Settings',
         ),
@@ -55,23 +53,27 @@ class DashboardScreen extends StatelessWidget {
           return const Center(child: Text('Error initializing app.'));
         }
 
-        return Column(
-          children: [
-            _buildSpendingChart(controller),
-            const Divider(height: 1),
-            _buildCategoriesGrid(context, controller),
-          ],
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildSpendingChart(controller),
+              _buildCategoriesGrid(context, controller),
+            ],
+          ),
         );
       },
     );
   }
 
   Widget _buildSpendingChart(DashboardController controller) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: SpendingChart(
-        categories: controller.categories,
-        colorMap: controller.colorMap,
+    return Card(
+      margin: const EdgeInsets.all(AppTheme.spaceM),
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spaceM),
+        child: SpendingChart(
+          categories: controller.categories,
+          colorMap: controller.colorMap,
+        ),
       ),
     );
   }
@@ -80,23 +82,21 @@ class DashboardScreen extends StatelessWidget {
     BuildContext context,
     DashboardController controller,
   ) {
-    return Expanded(
-      child: AnimationLimiter(
-        child: GridView.builder(
-          padding: const EdgeInsets.all(16.0),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1,
-          ),
-          itemCount: controller.categories.length,
-          itemBuilder: (context, index) {
-            final category = controller.categories[index];
-            return _buildCategoryGridItem(context, controller, category, index);
-          },
-        ),
+    return GridView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: AppTheme.spaceM,
+        mainAxisSpacing: AppTheme.spaceM,
+        childAspectRatio: 1,
       ),
+      itemCount: controller.categories.length,
+      itemBuilder: (context, index) {
+        final category = controller.categories[index];
+        return _buildCategoryGridItem(context, controller, category, index);
+      },
     );
   }
 
@@ -106,46 +106,34 @@ class DashboardScreen extends StatelessWidget {
     Map<String, dynamic> category,
     int index,
   ) {
-    return AnimationConfiguration.staggeredGrid(
-      position: index,
-      columnCount: 2,
-      duration: const Duration(milliseconds: 500),
-      child: SlideAnimation(
-        verticalOffset: 50.0,
-        child: FadeInAnimation(
-          child: GestureDetector(
-            onTap: () async {
-              final categoryTransactions = controller.transactions
-                  .where((t) => t.mainCategoryId == category['type'])
-                  .toList();
+    return GestureDetector(
+      onTap: () async {
+        final categoryTransactions = controller.transactions
+            .where((t) => t.mainCategoryId == category['type'])
+            .toList();
 
-              // 'await' here will pause until the details screen is closed
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChangeNotifierProvider(
-                    create: (context) => CategoryDetailsController(
-                      budgetManager: context.read<BudgetManager>(),
-                      existingTransactions: categoryTransactions,
-                    ),
-                    child: CategoryDetailsScreen(
-                      categoryName: category['name'],
-                    ),
-                  ),
-                ),
-              );
-
-              // When we come back, call the new refresh method
-              await controller.refreshData();
-            },
-            child: CategoryCard(
-              name: category['name'],
-              allocated: category['allocated'],
-              spent: category['spent'],
-              color: controller.colorMap[category['colorName']] ?? Colors.grey,
+        // 'await' here will pause until the details screen is closed
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+              create: (context) => CategoryDetailsController(
+                budgetManager: context.read<BudgetManager>(),
+                existingTransactions: categoryTransactions,
+              ),
+              child: CategoryDetailsScreen(categoryName: category['name']),
             ),
           ),
-        ),
+        );
+
+        // When we come back, call the new refresh method
+        await controller.refreshData();
+      },
+      child: CategoryCard(
+        name: category['name'],
+        allocated: category['allocated'],
+        spent: category['spent'],
+        color: AppTheme.categoryColors[category['type']] ?? Colors.grey,
       ),
     );
   }
@@ -182,54 +170,51 @@ class CategoryCard extends StatelessWidget {
     final double progress = (allocated > 0) ? spent / allocated : 0.0;
 
     return Card(
-      elevation: 4.0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(AppTheme.spaceM),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(Icons.savings, color: color, size: 32),
-                const SizedBox(width: 8),
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+            // Icon at top
+            Icon(Icons.savings_outlined, color: color, size: 28),
+            const SizedBox(height: AppTheme.spaceS),
+            // Category name
+            Text(
+              name,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const Spacer(),
+            // Amount spent
             Text(
               '₹${spent.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
+            // Amount allocated
             Text(
               'of ₹${allocated.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 14),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
-            const SizedBox(height: 8.0),
-
-            TweenAnimationBuilder<double>(
-              // The tween defines the range. We only need to provide the target 'end' value.
-              tween: Tween(end: progress),
-              // Duration of the animation
-              duration: const Duration(milliseconds: 400),
-              // The builder gives us the animated value for each frame
-              builder: (context, animatedValue, child) {
-                return LinearProgressIndicator(
-                  // The value is now the smoothly animated value from the builder
-                  value: animatedValue,
-                  minHeight: 8.0,
-                  backgroundColor: color.withValues(alpha: 0.3),
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                  borderRadius: BorderRadius.circular(4.0),
-                );
-              },
+            const SizedBox(height: AppTheme.spaceM),
+            // Progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(end: progress),
+                duration: const Duration(milliseconds: 300),
+                builder: (context, animatedValue, child) {
+                  return LinearProgressIndicator(
+                    value: animatedValue,
+                    minHeight: 6.0,
+                    backgroundColor: AppTheme.dividerColor,
+                    valueColor: AlwaysStoppedAnimation<Color>(color),
+                  );
+                },
+              ),
             ),
           ],
         ),

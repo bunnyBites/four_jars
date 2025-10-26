@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 class AppTheme {
   // Color Palette
   static const Color softSageGreen = Color(0xFFC1E1C1); // Main background
-  static const Color peachCream = Color(0xFFE8D4C1); // Accent 1
-  static const Color skyBlue = Color(0xFFC1D4E8); // Accent 2
-  static const Color lavender = Color(0xFFD4C1E8); // Accent 3
-  static const Color sageGray = Color(0xFF8A9B8F); // Accent 4 (text/borders)
+  static const Color peachCream = Color(0xFFE8D4C1); // Needs category
+  static const Color skyBlue = Color(0xFFC1D4E8); // Wants category
+  static const Color lavender = Color(0xFFD4C1E8); // Savings category
+  static const Color lightMint = Color(0xFFB8E0D2); // Investments category
+  static const Color sageGray = Color(0xFF8A9B8F); // Borders/outline
 
   // Semantic colors
   static const Color cardBackground = Colors.white;
@@ -332,6 +333,6 @@ class AppTheme {
     0: peachCream, // Needs
     1: skyBlue, // Wants
     2: lavender, // Savings
-    3: Color(0xFFB8E0D2), // Investments (lighter mint)
+    3: lightMint, // Investments
   };
 }

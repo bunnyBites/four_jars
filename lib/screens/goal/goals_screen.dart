@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/models/goal/goal.dart';
 import 'package:four_jars/screens/goal/goals_controller.dart';
-import 'package:intl/intl.dart';
+import 'package:four_jars/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class GoalsScreen extends StatelessWidget {
@@ -29,14 +29,19 @@ class GoalsScreen extends StatelessWidget {
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Goal Name'),
+              decoration: const InputDecoration(
+                labelText: 'Goal Name',
+                hintText: 'e.g., New Laptop',
+              ),
               autofocus: true,
             ),
+            const SizedBox(height: AppTheme.spaceM),
             TextField(
               controller: amountController,
               decoration: const InputDecoration(
                 labelText: 'Target Amount',
                 prefixText: '₹ ',
+                hintText: '0',
               ),
               keyboardType: TextInputType.number,
             ),
@@ -47,7 +52,7 @@ class GoalsScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () {
               final name = nameController.text;
               final amount = double.tryParse(amountController.text);
@@ -64,6 +69,10 @@ class GoalsScreen extends StatelessWidget {
                 Navigator.pop(ctx);
               }
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.textPrimary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Save'),
           ),
         ],
@@ -86,6 +95,7 @@ class GoalsScreen extends StatelessWidget {
           decoration: const InputDecoration(
             labelText: 'Amount',
             prefixText: '₹ ',
+            hintText: '0',
           ),
           keyboardType: TextInputType.number,
           autofocus: true,
@@ -95,7 +105,7 @@ class GoalsScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () {
               final amount = double.tryParse(amountController.text);
               if (amount != null && amount > 0) {
@@ -103,6 +113,10 @@ class GoalsScreen extends StatelessWidget {
                 Navigator.pop(ctx);
               }
             },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.textPrimary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Add'),
           ),
         ],
@@ -115,24 +129,17 @@ class GoalsScreen extends StatelessWidget {
     return Consumer<GoalsController>(
       builder: (context, controller, child) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Savings Goals')),
+          appBar: AppBar(title: const Text('Goals')),
           body: controller.goals.isEmpty
-              ? const Center(
-                  child: Text('No savings goals yet. Tap + to add one!'),
-                )
+              ? _buildEmptyState(context, controller)
               : ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppTheme.spaceM),
                   itemCount: controller.goals.length,
                   itemBuilder: (context, index) {
                     final goal = controller.goals[index];
                     return Dismissible(
                       key: ValueKey(goal.id),
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
+                      background: _buildDismissibleBackground(),
                       direction: DismissDirection.endToStart,
                       onDismissed: (direction) {
                         final goalToDelete = goal;
@@ -143,6 +150,12 @@ class GoalsScreen extends StatelessWidget {
                             .showSnackBar(
                               SnackBar(
                                 content: Text('${goalToDelete.name} deleted'),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusM,
+                                  ),
+                                ),
                                 action: SnackBarAction(
                                   label: 'Undo',
                                   onPressed: () {
@@ -186,9 +199,48 @@ class GoalsScreen extends StatelessWidget {
       },
     );
   }
+
+  Widget _buildEmptyState(BuildContext context, GoalsController controller) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.flag_outlined,
+            size: 64,
+            color: AppTheme.textSecondary.withOpacity(0.5),
+          ),
+          const SizedBox(height: AppTheme.spaceM),
+          Text(
+            'No goals yet',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: AppTheme.spaceS),
+          Text(
+            'Tap + to create your first goal',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDismissibleBackground() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
+      alignment: Alignment.centerRight,
+      padding: const EdgeInsets.only(right: AppTheme.spaceL),
+      child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
+    );
+  }
 }
 
-@override
 class GoalCard extends StatelessWidget {
   final Goal goal;
   final VoidCallback onAddFunds;
@@ -197,49 +249,55 @@ class GoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final progress = (goal.targetAmount > 0)
-        ? goal.savedAmount / goal.targetAmount
+        ? (goal.savedAmount / goal.targetAmount).clamp(0.0, 1.0)
         : 0.0;
-    final currencyFormat = NumberFormat.currency(locale: 'en_IN', symbol: '₹');
     final bool isCompleted = progress >= 1.0;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppTheme.spaceM),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(goal.name, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
             Text(
-              '${currencyFormat.format(goal.savedAmount)} / ${currencyFormat.format(goal.targetAmount)}',
-              style: Theme.of(context).textTheme.bodyMedium,
+              goal.name,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(5),
-              color: isCompleted
-                  ? Colors.green
-                  : Theme.of(context).colorScheme.primary,
+            const SizedBox(height: AppTheme.spaceS),
+            Text(
+              '₹${goal.savedAmount.toStringAsFixed(0)} / ₹${goal.targetAmount.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                isCompleted
-                    ? const Icon(Icons.check_circle, color: Colors.green)
-                    : OutlinedButton.icon(
-                        onPressed: onAddFunds,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Funds'),
+            const SizedBox(height: AppTheme.spaceM),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: AppTheme.dividerColor,
+                color: isCompleted ? Colors.green : AppTheme.lavender,
+                minHeight: 8,
+              ),
+            ),
+            const SizedBox(height: AppTheme.spaceM),
+            Align(
+              alignment: Alignment.centerRight,
+              child: isCompleted
+                  ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 32,
+                    )
+                  : OutlinedButton(
+                      onPressed: onAddFunds,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.sageGray),
+                        foregroundColor: AppTheme.textPrimary,
                       ),
-              ],
+                      child: const Text('Add Funds'),
+                    ),
             ),
           ],
         ),
