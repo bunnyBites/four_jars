@@ -106,7 +106,6 @@ flutter_launcher_icons:
   image_path: "assets/four_jars.png"
   min_sdk_android: 21 # Your app's minimum Android SDK version
   adaptive_icon_foreground: "assets/four_jars.png"
-  adaptive_icon_background: "#1B7CC8"
 
 flutter_native_splash:
   color: "#ffffff" # Background color for light mode
