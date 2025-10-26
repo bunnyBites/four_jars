@@ -45,13 +45,13 @@ class _SettingsScreenState extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppTheme.spaceM),
       children: [
-        _buildThemeCard(context, themeController),
-        const SizedBox(height: AppTheme.spaceS),
         _buildIncomeCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildAllocationCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildNavigationCard(context),
+        const SizedBox(height: AppTheme.spaceS),
+        _buildThemeCard(context, themeController),
       ],
     );
   }
