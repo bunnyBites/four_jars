@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
+import 'package:four_jars/screens/settings/custom_slider_shapes/custom_slider_shapes.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_controller.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_screen.dart';
 import 'package:four_jars/screens/settings/settings_controller.dart';
@@ -200,11 +201,26 @@ class _SettingsScreenState extends StatelessWidget {
           const SizedBox(height: AppTheme.spaceS),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
+              trackHeight: 20,
+              trackShape: const PillSliderTrackShape(),
+              thumbShape: const VerticalBarSliderThumbShape(
+                width: 4,
+                height: 32,
+              ),
+              overlayShape: const VerticalBarSliderOverlayShape(
+                width: 8,
+                height: 40,
+              ),
               activeTrackColor: color,
-              inactiveTrackColor: AppTheme.dividerColor,
+              inactiveTrackColor: color.withAlpha((255 * 0.18).round()),
               thumbColor: color,
-              overlayColor: color.withValues(alpha: 0.1),
-              trackHeight: 6,
+              overlayColor: color.withAlpha((255 * 0.10).round()),
+              valueIndicatorColor: color,
+              valueIndicatorTextStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             child: Slider(
               value: value,
