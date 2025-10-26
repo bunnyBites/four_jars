@@ -45,15 +45,13 @@ class _SettingsScreenState extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppTheme.spaceM),
       children: [
+        _buildThemeCard(context, themeController),
+        const SizedBox(height: AppTheme.spaceS),
         _buildIncomeCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildAllocationCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildNavigationCard(context),
-        const SizedBox(height: AppTheme.spaceS),
-        _buildThemeCard(context, themeController),
-        const SizedBox(height: AppTheme.spaceL),
-        _buildSaveButton(controller),
       ],
     );
   }
@@ -271,29 +269,6 @@ class _SettingsScreenState extends StatelessWidget {
             },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSaveButton(SettingsController controller) {
-    return Builder(
-      builder: (context) => SizedBox(
-        width: double.infinity,
-        child: FilledButton(
-          onPressed: () {
-            controller.saveSettings();
-            Navigator.pop(context);
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: AppTheme.textPrimary,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusM),
-            ),
-          ),
-          child: const Text('Save Settings'),
-        ),
       ),
     );
   }

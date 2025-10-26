@@ -25,7 +25,13 @@ class ReportsScreen extends StatelessWidget {
                 ? _buildErrorState(context, controller)
                 : controller.monthlySpending.isEmpty
                 ? _buildEmptyState(context)
-                : _buildChart(context, controller),
+                : Column(
+                    children: [
+                      _buildChart(context, controller),
+                      const SizedBox(height: AppTheme.spaceM),
+                      _buildSummaryCard(context, controller),
+                    ],
+                  ),
           ],
         ),
       ),
@@ -123,7 +129,7 @@ class ReportsScreen extends StatelessWidget {
               Icon(
                 Icons.bar_chart_outlined,
                 size: 64,
-                color: AppTheme.textSecondary.withOpacity(0.5),
+                color: AppTheme.textSecondary.withValues(alpha: 0.5),
               ),
               const SizedBox(height: AppTheme.spaceM),
               Text(
@@ -281,5 +287,88 @@ class ReportsScreen extends StatelessWidget {
       AppTheme.lightMint,
     ];
     return colors[index % colors.length];
+  }
+
+  Widget _buildSummaryCard(BuildContext context, ReportsController controller) {
+    final totalSpent = controller.monthlySpending.fold(
+      0.0,
+      (sum, item) => sum + item.amount,
+    );
+    final highestCategory = controller.monthlySpending.first;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceM),
+      child: Padding(
+        padding: const EdgeInsets.all(AppTheme.spaceM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Monthly Summary',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppTheme.spaceM),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildSummaryItem(
+                  context,
+                  'Total Spent',
+                  '₹${totalSpent.toStringAsFixed(0)}',
+                  Icons.account_balance_wallet_outlined,
+                ),
+                _buildSummaryItem(
+                  context,
+                  'Top Category',
+                  highestCategory.subCategoryName,
+                  Icons.trending_up,
+                ),
+                _buildSummaryItem(
+                  context,
+                  'Categories',
+                  '${controller.monthlySpending.length}',
+                  Icons.category_outlined,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: AppTheme.sageGray, size: 28),
+          const SizedBox(height: AppTheme.spaceS),
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

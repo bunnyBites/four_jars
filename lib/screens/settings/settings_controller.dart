@@ -46,6 +46,29 @@ class SettingsController extends ChangeNotifier {
     _investmentsPerc = box
         .get('investmentsPercentage', defaultValue: 10)
         .toDouble();
+
+    // Listen to income changes and auto-save
+    _incomeController.addListener(_autoSaveIncome);
+  }
+
+  void _autoSaveIncome() {
+    final income = double.tryParse(_incomeController.text);
+    if (income != null && income > 0) {
+      _saveIncomeOnly(income);
+    }
+  }
+
+  void _saveIncomeOnly(double income) async {
+    final box = Hive.box('budgetBox');
+    await box.put('totalIncome', income);
+    _budgetManager.loadData();
+  }
+
+  @override
+  void dispose() {
+    _incomeController.removeListener(_autoSaveIncome);
+    _incomeController.dispose();
+    super.dispose();
   }
 
   // logic to adjust sliders while keeping the total at 100%
@@ -109,6 +132,25 @@ class SettingsController extends ChangeNotifier {
     }
 
     notifyListeners();
+
+    // Auto-save the percentages
+    _autoSavePercentages();
+  }
+
+  void _autoSavePercentages() async {
+    final percentages = {
+      'needs': _needsPerc.toInt(),
+      'wants': _wantsPerc.toInt(),
+      'savings': _savingsPerc.toInt(),
+      'investments': _investmentsPerc.toInt(),
+    };
+
+    final box = Hive.box('budgetBox');
+    await box.put('needsPercentage', percentages['needs']);
+    await box.put('wantsPercentage', percentages['wants']);
+    await box.put('savingsPercentage', percentages['savings']);
+    await box.put('investmentsPercentage', percentages['investments']);
+    _budgetManager.loadData();
   }
 
   void saveSettings() {
