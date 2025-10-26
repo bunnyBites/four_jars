@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/theme/app_theme.dart';
 
 class SpendingChart extends StatelessWidget {
@@ -53,7 +54,10 @@ class SpendingChart extends StatelessWidget {
                 final double percentage =
                     (category['spent'] / totalSpent) * 100;
                 final color =
-                    AppTheme.categoryColors[category['type']] ?? Colors.grey;
+                    AppTheme.categoryColors[(category['type']
+                            as MainCategoryType)
+                        .index] ??
+                    Colors.grey;
 
                 return PieChartSectionData(
                   color: color,
@@ -78,7 +82,9 @@ class SpendingChart extends StatelessWidget {
           alignment: WrapAlignment.center,
           children: categories.map((category) {
             final color =
-                AppTheme.categoryColors[category['type']] ?? Colors.grey;
+                AppTheme.categoryColors[(category['type'] as MainCategoryType)
+                    .index] ??
+                Colors.grey;
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [

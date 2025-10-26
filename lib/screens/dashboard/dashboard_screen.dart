@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:four_jars/screens/category_details/category_details_controller.dart';
 import 'package:four_jars/screens/category_details/category_details_screen.dart';
 import 'package:four_jars/logic/budget_manager.dart';
+import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/screens/dashboard/dashboard_controller.dart';
 import 'package:four_jars/screens/main/widgets/spending_chart.dart';
 import 'package:four_jars/theme/app_theme.dart';
@@ -133,7 +134,10 @@ class DashboardScreen extends StatelessWidget {
         name: category['name'],
         allocated: category['allocated'],
         spent: category['spent'],
-        color: AppTheme.categoryColors[category['type']] ?? Colors.grey,
+        color:
+            AppTheme.categoryColors[(category['type'] as MainCategoryType)
+                .index] ??
+            Colors.grey,
       ),
     );
   }
