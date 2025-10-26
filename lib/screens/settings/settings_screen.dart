@@ -4,7 +4,7 @@ import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_controller.dart';
 import 'package:four_jars/screens/settings/recurring_transactions/recurring_transactions_screen.dart';
 import 'package:four_jars/screens/settings/settings_controller.dart';
-import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_screen.dart';
+import 'package:four_jars/screens/settings/sub_category_list/sub_category_management_screen.dart';
 import 'package:four_jars/theme/app_theme.dart';
 import 'package:four_jars/theme/theme_controller.dart';
 import 'package:provider/provider.dart';
@@ -44,13 +44,13 @@ class _SettingsScreenState extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(AppTheme.spaceM),
       children: [
-        _buildThemeCard(context, themeController),
-        const SizedBox(height: AppTheme.spaceS),
         _buildIncomeCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildAllocationCard(context, controller),
         const SizedBox(height: AppTheme.spaceS),
         _buildNavigationCard(context),
+        const SizedBox(height: AppTheme.spaceS),
+        _buildThemeCard(context, themeController),
         const SizedBox(height: AppTheme.spaceL),
         _buildSaveButton(controller),
       ],
@@ -203,7 +203,7 @@ class _SettingsScreenState extends StatelessWidget {
               activeTrackColor: color,
               inactiveTrackColor: AppTheme.dividerColor,
               thumbColor: color,
-              overlayColor: color.withOpacity(0.1),
+              overlayColor: color.withValues(alpha: 0.1),
               trackHeight: 6,
             ),
             child: Slider(
@@ -228,32 +228,10 @@ class _SettingsScreenState extends StatelessWidget {
             title: const Text('Manage Sub-Categories'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // Show dialog to choose category
-              showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Select Category'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: MainCategoryType.values.map((category) {
-                      return ListTile(
-                        title: Text(
-                          category.name[0].toUpperCase() +
-                              category.name.substring(1),
-                        ),
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  SubCategoryListScreen(mainCategory: category),
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SubCategoryManagementScreen(),
                 ),
               );
             },

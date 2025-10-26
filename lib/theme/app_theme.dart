@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Color Palette
+  // color palette
   static const Color softSageGreen = Color(0xFFC1E1C1); // Main background
   static const Color peachCream = Color(0xFFE8D4C1); // Needs category
   static const Color skyBlue = Color(0xFFC1D4E8); // Wants category
@@ -9,20 +9,20 @@ class AppTheme {
   static const Color lightMint = Color(0xFFB8E0D2); // Investments category
   static const Color sageGray = Color(0xFF8A9B8F); // Borders/outline
 
-  // Semantic colors
+  // semantic colors
   static const Color cardBackground = Colors.white;
   static const Color textPrimary = Color(0xFF2D3436);
   static const Color textSecondary = Color(0xFF636E72);
   static const Color dividerColor = Color(0xFFE8EEE8);
 
-  // Spacing system
+  // spacing system
   static const double spaceXS = 4.0;
   static const double spaceS = 8.0;
   static const double spaceM = 16.0;
   static const double spaceL = 24.0;
   static const double spaceXL = 32.0;
 
-  // Border radius
+  // border radius
   static const double radiusS = 8.0;
   static const double radiusM = 12.0;
   static const double radiusL = 16.0;
@@ -42,7 +42,6 @@ class AppTheme {
     ),
     scaffoldBackgroundColor: softSageGreen,
 
-    // AppBar Theme
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -56,7 +55,6 @@ class AppTheme {
       iconTheme: IconThemeData(color: textPrimary, size: 24),
     ),
 
-    // Card Theme
     cardTheme: CardThemeData(
       color: cardBackground,
       elevation: 0,
@@ -66,7 +64,6 @@ class AppTheme {
       margin: EdgeInsets.zero,
     ),
 
-    // Text Theme
     textTheme: TextTheme(
       displayLarge: TextStyle(
         fontSize: 32,
@@ -121,7 +118,6 @@ class AppTheme {
       ),
     ),
 
-    // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: cardBackground,
@@ -143,7 +139,6 @@ class AppTheme {
       ),
     ),
 
-    // FloatingActionButton Theme
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: textPrimary,
       foregroundColor: Colors.white,
@@ -153,7 +148,6 @@ class AppTheme {
       ),
     ),
 
-    // Bottom Navigation Bar Theme
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: cardBackground,
       selectedItemColor: textPrimary,
@@ -167,7 +161,6 @@ class AppTheme {
       ),
     ),
 
-    // Dialog Theme
     dialogTheme: DialogThemeData(
       backgroundColor: cardBackground,
       elevation: 0,
@@ -176,8 +169,18 @@ class AppTheme {
       ),
     ),
 
-    // Divider Theme
     dividerTheme: DividerThemeData(color: dividerColor, thickness: 1, space: 1),
+
+    tabBarTheme: TabBarThemeData(
+      labelColor: textPrimary,
+      unselectedLabelColor: textSecondary,
+      dividerColor: softSageGreen,
+      indicatorColor: textPrimary,
+      unselectedLabelStyle: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
+    ),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -326,9 +329,22 @@ class AppTheme {
       thickness: 1,
       space: 1,
     ),
+
+    tabBarTheme: TabBarThemeData(
+      labelColor: Colors.white,
+      unselectedLabelColor: Color(0xFF7A7A7A),
+      indicatorColor: Colors.white,
+      dividerColor: Colors.white,
+      indicatorSize: TabBarIndicatorSize.tab,
+      labelStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      unselectedLabelStyle: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
+    ),
   );
 
-  // Category colors mapping
+  // category colors mapping
   static const Map<int, Color> categoryColors = {
     0: peachCream, // Needs
     1: skyBlue, // Wants
