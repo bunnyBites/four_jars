@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/screens/main/widgets/add_transaction_sheet/add_transaction_sheet_controller.dart';
+import 'package:four_jars/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class AddTransactionSheet extends StatelessWidget {
@@ -10,26 +11,46 @@ class AddTransactionSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AddTransactionController>(
       builder: (context, controller, child) {
-        final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
-
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + keyboardSpace),
+        return Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.cardBackground,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppTheme.radiusXL),
+            ),
+          ),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildTitle(controller),
-                const SizedBox(height: 24),
-                _buildAmountField(controller),
-                const SizedBox(height: 16),
-                _buildDescriptionField(controller),
-                const SizedBox(height: 16),
-                _buildMainCategoryDropdown(controller),
-                const SizedBox(height: 16),
-                _buildSubCategoryDropdown(controller),
-                const SizedBox(height: 24),
-                _buildSaveButton(controller),
+                _buildDragHandle(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.spaceL,
+                    AppTheme.spaceS,
+                    AppTheme.spaceL,
+                    AppTheme.spaceL,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTitle(context, controller),
+                      const SizedBox(height: AppTheme.spaceL),
+                      _buildAmountField(controller),
+                      const SizedBox(height: AppTheme.spaceM),
+                      _buildDescriptionField(controller),
+                      const SizedBox(height: AppTheme.spaceM),
+                      _buildMainCategoryDropdown(controller),
+                      const SizedBox(height: AppTheme.spaceM),
+                      _buildSubCategoryDropdown(controller),
+                      const SizedBox(height: AppTheme.spaceL),
+                      _buildSaveButton(context, controller),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -38,11 +59,28 @@ class AddTransactionSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildTitle(AddTransactionController controller) {
+  Widget _buildDragHandle() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: AppTheme.textSecondary.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  Widget _buildTitle(
+    BuildContext context,
+    AddTransactionController controller,
+  ) {
     return Text(
-      controller.isEditing ? 'Edit Transaction' : 'Add New Transaction',
+      controller.isEditing ? 'Edit Transaction' : 'Add Transaction',
       textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      style: Theme.of(
+        context,
+      ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 
@@ -50,10 +88,11 @@ class AddTransactionSheet extends StatelessWidget {
     return TextField(
       controller: controller.amountController,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      autofocus: !controller.isEditing,
       decoration: const InputDecoration(
         labelText: 'Amount',
         prefixText: '₹ ',
-        border: OutlineInputBorder(),
+        hintText: '0',
       ),
     );
   }
@@ -63,14 +102,14 @@ class AddTransactionSheet extends StatelessWidget {
       controller: controller.descriptionController,
       decoration: const InputDecoration(
         labelText: 'Description',
-        border: OutlineInputBorder(),
+        hintText: 'e.g., Grocery shopping',
       ),
     );
   }
 
   Widget _buildMainCategoryDropdown(AddTransactionController controller) {
     return DropdownButtonFormField<MainCategoryType>(
-      initialValue: controller.selectedMainCategory,
+      value: controller.selectedMainCategory,
       hint: const Text('Select Category'),
       items: MainCategoryType.values.map((category) {
         return DropdownMenuItem(
@@ -81,16 +120,16 @@ class AddTransactionSheet extends StatelessWidget {
         );
       }).toList(),
       onChanged: controller.isEditing ? null : controller.onMainCategoryChanged,
-      decoration: const InputDecoration(
-        labelText: 'Category',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        labelText: 'Main Category',
+        enabled: !controller.isEditing,
       ),
     );
   }
 
   Widget _buildSubCategoryDropdown(AddTransactionController controller) {
     return DropdownButtonFormField<String>(
-      initialValue: controller.selectedSubCategoryId,
+      value: controller.selectedSubCategoryId,
       hint: const Text('Select Sub-category'),
       items: controller.availableSubCategories.map((subCategory) {
         return DropdownMenuItem(
@@ -101,27 +140,34 @@ class AddTransactionSheet extends StatelessWidget {
       onChanged: controller.availableSubCategories.isEmpty
           ? null
           : controller.onSubCategoryChanged,
-      decoration: const InputDecoration(
-        labelText: 'Sub-category',
-        border: OutlineInputBorder(),
-      ),
+      decoration: const InputDecoration(labelText: 'Sub-category'),
     );
   }
 
-  Widget _buildSaveButton(AddTransactionController controller) {
-    return Builder(
-      builder: (context) => ElevatedButton(
+  Widget _buildSaveButton(
+    BuildContext context,
+    AddTransactionController controller,
+  ) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
         onPressed: () {
           final transaction = controller.submitData(context);
           if (transaction != null) {
-            // Pop with a result that the calling screen can use
             Navigator.pop(context, transaction);
           }
         },
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppTheme.textPrimary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceM),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusM),
+          ),
         ),
-        child: const Text('Save Transaction'),
+        child: Text(
+          controller.isEditing ? 'Update Transaction' : 'Add Transaction',
+        ),
       ),
     );
   }

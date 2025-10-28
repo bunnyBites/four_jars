@@ -3,6 +3,7 @@ import 'package:four_jars/logic/budget_manager.dart';
 import 'package:four_jars/models/main_category_type/main_category_type.dart';
 import 'package:four_jars/models/sub_category/sub_category.dart';
 import 'package:four_jars/screens/settings/sub_category_list/sub_category_list_controller.dart';
+import 'package:four_jars/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class SubCategoryListScreen extends StatelessWidget {
@@ -36,55 +37,50 @@ class _SubCategoryListView extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (ctx) => _buildDialog(
-        context: ctx,
-        controller: controller,
-        textController: textController,
-        existingSubCategory: existingSubCategory,
-      ),
-    );
-  }
-
-  Widget _buildDialog({
-    required BuildContext context,
-    required SubCategoryListController controller,
-    required TextEditingController textController,
-    SubCategory? existingSubCategory,
-  }) {
-    return AlertDialog(
-      title: Text(
-        existingSubCategory == null ? 'Add Sub-category' : 'Edit Sub-category',
-      ),
-      content: TextField(
-        controller: textController,
-        autofocus: true,
-        decoration: const InputDecoration(labelText: 'Name'),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          existingSubCategory == null
+              ? 'Add Sub-category'
+              : 'Edit Sub-category',
         ),
-        TextButton(
-          onPressed: () async {
-            if (textController.text.trim().isEmpty) return;
-
-            if (existingSubCategory == null) {
-              await controller.addSubCategory(textController.text);
-            } else {
-              await controller.updateSubCategory(
-                existingSubCategory,
-                textController.text,
-              );
-            }
-
-            if (context.mounted) {
-              Navigator.pop(context);
-            }
-          },
-          child: const Text('Save'),
+        content: TextField(
+          controller: textController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Name',
+            hintText: 'e.g., Groceries',
+          ),
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (textController.text.trim().isEmpty) return;
+
+              if (existingSubCategory == null) {
+                await controller.addSubCategory(textController.text);
+              } else {
+                await controller.updateSubCategory(
+                  existingSubCategory,
+                  textController.text,
+                );
+              }
+
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+              }
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppTheme.textPrimary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -97,6 +93,11 @@ class _SubCategoryListView extends StatelessWidget {
           body: controller.subCategories.isEmpty
               ? _buildEmptyState(context)
               : _buildSubCategoriesList(context, controller),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _showAddEditDialog(context),
+            tooltip: 'Add Sub-category',
+            child: const Icon(Icons.add),
+          ),
         );
       },
     );
@@ -106,16 +107,7 @@ class _SubCategoryListView extends StatelessWidget {
     BuildContext context,
     SubCategoryListController controller,
   ) {
-    return AppBar(
-      title: Text('${controller.categoryName} Sub-categories'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add),
-          onPressed: () => _showAddEditDialog(context),
-          tooltip: 'Add Sub-category',
-        ),
-      ],
-    );
+    return AppBar(title: Text('${controller.categoryName} Sub-categories'));
   }
 
   Widget _buildEmptyState(BuildContext context) {
@@ -123,26 +115,22 @@ class _SubCategoryListView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.category_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            'No Sub-categories Yet',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Icon(
+            Icons.category_outlined,
+            size: 64,
+            color: AppTheme.textSecondary.withOpacity(0.5),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppTheme.spaceM),
           Text(
-            'Tap the + button to add your first sub-category',
-            style: TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
+            'No sub-categories yet',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppTheme.textSecondary),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _showAddEditDialog(context),
-            icon: const Icon(Icons.add),
-            label: const Text('Add Sub-category'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
+          const SizedBox(height: AppTheme.spaceS),
+          Text(
+            'Tap + to add your first sub-category',
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
       ),
@@ -154,15 +142,16 @@ class _SubCategoryListView extends StatelessWidget {
     SubCategoryListController controller,
   ) {
     return ListView.builder(
+      padding: const EdgeInsets.all(AppTheme.spaceM),
       itemCount: controller.subCategories.length,
       itemBuilder: (context, index) {
         final subCategory = controller.subCategories[index];
-        return _buildSubCategoryTile(context, controller, subCategory);
+        return _buildSubCategoryCard(context, controller, subCategory);
       },
     );
   }
 
-  Widget _buildSubCategoryTile(
+  Widget _buildSubCategoryCard(
     BuildContext context,
     SubCategoryListController controller,
     SubCategory subCategory,
@@ -179,17 +168,35 @@ class _SubCategoryListView extends StatelessWidget {
             SnackBar(
               content: Text('${subCategory.name} deleted'),
               duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+              ),
             ),
           );
         }
       },
-      child: ListTile(
-        title: Text(subCategory.name),
-        trailing: IconButton(
-          icon: const Icon(Icons.edit, color: Colors.grey),
-          onPressed: () =>
-              _showAddEditDialog(context, existingSubCategory: subCategory),
-          tooltip: 'Edit Sub-category',
+      child: Card(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        child: ListTile(
+          title: Text(
+            subCategory.name,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                onPressed: () => _showAddEditDialog(
+                  context,
+                  existingSubCategory: subCategory,
+                ),
+                tooltip: 'Edit',
+              ),
+              const Icon(Icons.drag_handle, color: AppTheme.textSecondary),
+            ],
+          ),
         ),
       ),
     );
@@ -197,10 +204,14 @@ class _SubCategoryListView extends StatelessWidget {
 
   Widget _buildDismissibleBackground() {
     return Container(
-      color: Colors.red,
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.red,
+        borderRadius: BorderRadius.circular(AppTheme.radiusL),
+      ),
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.only(right: 20),
-      child: const Icon(Icons.delete, color: Colors.white),
+      padding: const EdgeInsets.only(right: AppTheme.spaceL),
+      child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
     );
   }
 }
